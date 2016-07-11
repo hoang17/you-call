@@ -13,7 +13,7 @@ import {
 
 import io from 'socket.io-client/socket.io';
 
-const socket = io.connect('https://react-native-webrtc.herokuapp.com', {transports: ['websocket']});
+const socket = io.connect('youcall.io', {transports: ['websocket']});
 
 import {
   RTCPeerConnection,
@@ -42,9 +42,10 @@ function getLocalStream(isFront, callback) {
     }
     getUserMedia({
       "audio": true,
-      "video": {
-        optional: [{sourceId: videoSourceId}]
-      }
+      "video": false
+//       "video": {
+//         optional: [{sourceId: videoSourceId}]
+//       }
     }, function (stream) {
       console.log('dddd', stream);
       callback(stream);
@@ -218,7 +219,7 @@ function mapHash(hash, func) {
 
 function getStats() {
   const pc = pcPeers[Object.keys(pcPeers)[0]];
-  if (pc.getRemoteStreams()[0] && pc.getRemoteStreams()[0].getAudioTracks()[0]) {
+  if (pc.getRemoteStreams && pc.getRemoteStreams()[0] && pc.getRemoteStreams()[0].getAudioTracks()[0]) {
     const track = pc.getRemoteStreams()[0].getAudioTracks()[0];
     console.log('track', track);
     pc.getStats(track, function(report) {
