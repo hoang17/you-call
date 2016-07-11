@@ -236,7 +236,7 @@ const RCTWebRTCDemo = React.createClass({
     return {
       info: 'Initializing',
       status: 'init',
-      roomID: '',
+      roomID: 'abc',
       isFront: true,
       selfViewSrc: null,
       remoteList: {},
