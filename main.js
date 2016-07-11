@@ -1,5 +1,8 @@
 'use strict';
 
+// @hoang import code push
+import codePush from "react-native-code-push";
+
 import React, { Component } from 'react';
 import {
   AppRegistry,
@@ -246,6 +249,10 @@ const RCTWebRTCDemo = React.createClass({
     };
   },
   componentDidMount: function() {
+
+	// @hoang add code push sync
+    codePush.sync();
+
     container = this;
   },
   _press(event) {
