@@ -1,8 +1,8 @@
+// @flow
 'use strict';
 
 // @hoang import code push
 import codePush from "react-native-code-push";
-
 import React, { Component } from 'react';
 import {
   AppRegistry,
@@ -13,11 +13,7 @@ import {
   TextInput,
   ListView,
 } from 'react-native';
-
 import io from 'socket.io-client/socket.io';
-
-const socket = io.connect('youcall.io', {transports: ['websocket']});
-
 import {
   RTCPeerConnection,
   RTCMediaStream,
@@ -28,10 +24,10 @@ import {
   getUserMedia,
 } from 'react-native-webrtc';
 
-
+const socket = io.connect('youcall.io', {transports: ['websocket']});
 const configuration = {"iceServers": [
   {url: "stun:stun.l.google.com:19302"},
-  {url:"stun:stun.services.mozilla.com"}
+  {url:"stun:stun.services.mozilla.com"},
   {url:'stun:stun01.sipphone.com'},
   {url:'stun:stun.ekiga.net'},
   {url:'stun:stun.fwdnet.net'},
@@ -69,7 +65,6 @@ const configuration = {"iceServers": [
   },
   {"username": "1468516014:iapprtc", "credential": "WqKQ41PROOyvM2MMT9mLovBE2NY=", "urls": ["turn:104.155.208.130:3478?transport=udp", "turn:104.155.208.130:3478?transport=tcp", "turn:104.155.208.130:3479?transport=udp", "turn:104.155.208.130:3479?transport=tcp"]}
 ]};
-
 const pcPeers = {};
 let localStream;
 
@@ -90,7 +85,7 @@ function getLocalStream(isFront, callback) {
 //         optional: [{sourceId: videoSourceId}]
 //       }
     }, function (stream) {
-      console.log('dddd', stream);
+      console.log('stream3', stream);
       callback(stream);
     }, logError);
   });
@@ -242,7 +237,7 @@ socket.on('connect', function(data) {
   getLocalStream(true, function(stream) {
     localStream = stream;
     container.setState({selfViewSrc: stream.toURL()});
-    container.setState({status: 'ready', info: 'Please enter or create room ID'});
+    container.setState({status: 'ready', info: 'Enter friend name to call'});
   });
 });
 
@@ -288,10 +283,8 @@ const RCTWebRTCDemo = React.createClass({
     };
   },
   componentDidMount: function() {
-
     // @hoang add code push sync
     codePush.sync();
-
     container = this;
   },
   _press(event) {
@@ -362,7 +355,7 @@ const RCTWebRTCDemo = React.createClass({
           {this.state.info}
         </Text>
         {this.state.textRoomConnected && this._renderTextRoom()}
-        <View style={{flexDirection: 'row'}}>
+        {/*<View style={{flexDirection: 'row'}}>
           <Text>
             {this.state.isFront ? "Use front camera" : "Use back camera"}
           </Text>
@@ -371,7 +364,7 @@ const RCTWebRTCDemo = React.createClass({
             onPress={this._switchVideoType}>
             <Text>Switch camera</Text>
           </TouchableHighlight>
-        </View>
+        </View>*/}
         { this.state.status == 'ready' ?
           (<View>
             <TextInput
@@ -387,12 +380,14 @@ const RCTWebRTCDemo = React.createClass({
             </TouchableHighlight>
           </View>) : null
         }
-        <RTCView streamURL={this.state.selfViewSrc} style={styles.selfView}/>
+        {/* @hoang remove video*/}
+        {/*<RTCView streamURL={this.state.selfViewSrc} style={styles.selfView}/>
         {
           mapHash(this.state.remoteList, function(remote, index) {
             return <RTCView key={index} streamURL={remote} style={styles.remoteView}/>
           })
-        }
+        }*/}
+
       </View>
     );
   }
