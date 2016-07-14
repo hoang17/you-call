@@ -361,6 +361,16 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				BF772BDA1D2E508500C3B0A8 /* libstdc++.tbd */,
+				BF772BD81D2E507E00C3B0A8 /* libsqlite3.tbd */,
+				BF772BD61D2E507600C3B0A8 /* libc.tbd */,
+				BF772BD41D2E506B00C3B0A8 /* VideoToolbox.framework */,
+				BF772BD21D2E506500C3B0A8 /* CoreVideo.framework */,
+				BF772BD01D2E505F00C3B0A8 /* CoreAudio.framework */,
+				BF772BCE1D2E505800C3B0A8 /* GLKit.framework */,
+				BF772BCC1D2E505300C3B0A8 /* CoreGraphics.framework */,
+				BF772BCA1D2E504D00C3B0A8 /* AudioToolbox.framework */,
+				BF772BC81D2E503700C3B0A8 /* AVFoundation.framework */,
 				BF772B931D2E500700C3B0A8 /* libjingle_peerconnection */,
 				BF772BB51D2E500700C3B0A8 /* RCTWebRTC.xcodeproj */,
 				146833FF1AC3E56700842450 /* React.xcodeproj */,
@@ -389,16 +399,6 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				BF772BDA1D2E508500C3B0A8 /* libstdc++.tbd */,
-				BF772BD81D2E507E00C3B0A8 /* libsqlite3.tbd */,
-				BF772BD61D2E507600C3B0A8 /* libc.tbd */,
-				BF772BD41D2E506B00C3B0A8 /* VideoToolbox.framework */,
-				BF772BD21D2E506500C3B0A8 /* CoreVideo.framework */,
-				BF772BD01D2E505F00C3B0A8 /* CoreAudio.framework */,
-				BF772BCE1D2E505800C3B0A8 /* GLKit.framework */,
-				BF772BCC1D2E505300C3B0A8 /* CoreGraphics.framework */,
-				BF772BCA1D2E504D00C3B0A8 /* AudioToolbox.framework */,
-				BF772BC81D2E503700C3B0A8 /* AVFoundation.framework */,
 				13B07FAE1A68108700A75B9A /* RCTWebRTCDemo */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* RCTWebRTCDemoTests */,
