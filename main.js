@@ -71,13 +71,14 @@ let localStream;
 function getLocalStream(isFront, callback) {
   MediaStreamTrack.getSources(sourceInfos => {
     console.log(sourceInfos);
-    let videoSourceId;
-    for (const i = 0; i < sourceInfos.length; i++) {
-      const sourceInfo = sourceInfos[i];
-      if(sourceInfo.kind == "video" && sourceInfo.facing == (isFront ? "front" : "back")) {
-        videoSourceId = sourceInfo.id;
-      }
-    }
+    // @hoang remove video
+    // let videoSourceId;
+    // for (var i = 0; i < sourceInfos.length; i++) {
+    //   const sourceInfo = sourceInfos[i];
+    //   if(sourceInfo.kind == "video" && sourceInfo.facing == (isFront ? "front" : "back")) {
+    //     videoSourceId = sourceInfo.id;
+    //   }
+    // }
     getUserMedia({
       "audio": true,
       "video": false
@@ -85,7 +86,7 @@ function getLocalStream(isFront, callback) {
 //         optional: [{sourceId: videoSourceId}]
 //       }
     }, function (stream) {
-      console.log('stream3', stream);
+      console.log('stream', stream);
       callback(stream);
     }, logError);
   });
@@ -331,19 +332,21 @@ const RCTWebRTCDemo = React.createClass({
   },
   _renderTextRoom() {
     return (
-      <View style={styles.listViewContainer}>
+      <View style={styles.flowRight}>
         <ListView
           dataSource={this.ds.cloneWithRows(this.state.textRoomData)}
           renderRow={rowData => <Text>{`${rowData.user}: ${rowData.message}`}</Text>}
-          />
+        />
         <TextInput
-          style={{width: 200, height: 30, borderColor: 'gray', borderWidth: 1}}
+          style={styles.roomInput}
           onChangeText={value => this.setState({textRoomValue: value})}
           value={this.state.textRoomValue}
         />
-        <TouchableHighlight
-          onPress={this._textRoomPress}>
-          <Text>Send</Text>
+        <TouchableHighlight style={styles.button}
+            underlayColor='#99d9f4'
+            onPress={this._textRoomPress}
+            >
+          <Text style={styles.buttonText}>Send</Text>
         </TouchableHighlight>
       </View>
     );
@@ -351,70 +354,79 @@ const RCTWebRTCDemo = React.createClass({
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>
+        <Text style={styles.description}>
           {this.state.info}
         </Text>
         {this.state.textRoomConnected && this._renderTextRoom()}
-        {/*<View style={{flexDirection: 'row'}}>
-          <Text>
-            {this.state.isFront ? "Use front camera" : "Use back camera"}
-          </Text>
-          <TouchableHighlight
-            style={{borderWidth: 1, borderColor: 'black'}}
-            onPress={this._switchVideoType}>
-            <Text>Switch camera</Text>
-          </TouchableHighlight>
-        </View>*/}
         { this.state.status == 'ready' ?
-          (<View>
+          (<View style={styles.flowRight}>
             <TextInput
               ref='roomID'
               autoCorrect={false}
-              style={{width: 200, height: 40, borderColor: 'gray', borderWidth: 1}}
+              style={styles.roomInput}
               onChangeText={(text) => this.setState({roomID: text})}
               value={this.state.roomID}
+              placeholder='friend name'
             />
-            <TouchableHighlight
-              onPress={this._press}>
-              <Text>Enter room</Text>
-            </TouchableHighlight>
+
+            <TouchableHighlight style={styles.button}
+    				    underlayColor='#99d9f4'
+    						onPress={this._press}
+    				    >
+    				  <Text style={styles.buttonText}>Call</Text>
+    				</TouchableHighlight>
           </View>) : null
         }
-        {/* @hoang remove video*/}
-        {/*<RTCView streamURL={this.state.selfViewSrc} style={styles.selfView}/>
-        {
-          mapHash(this.state.remoteList, function(remote, index) {
-            return <RTCView key={index} streamURL={remote} style={styles.remoteView}/>
-          })
-        }*/}
-
       </View>
     );
   }
 });
 
 const styles = StyleSheet.create({
-  selfView: {
-    width: 200,
-    height: 150,
-  },
-  remoteView: {
-    width: 200,
-    height: 150,
+  description: {
+    marginBottom: 20,
+    fontSize: 18,
+    textAlign: 'center',
+    color: '#656565'
   },
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: '#F5FCFF',
+    padding: 30,
+    marginTop: 65,
+    alignItems: 'center'
   },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  listViewContainer: {
-    height: 150,
-  },
+  flowRight: {
+	  flexDirection: 'row',
+	  alignItems: 'center',
+	  alignSelf: 'stretch'
+	},
+	buttonText: {
+	  fontSize: 18,
+	  color: 'white',
+	  alignSelf: 'center'
+	},
+	button: {
+	  height: 36,
+	  flex: 1,
+	  flexDirection: 'row',
+	  backgroundColor: '#48BBEC',
+	  borderColor: '#48BBEC',
+	  borderWidth: 1,
+	  borderRadius: 8,
+	  marginBottom: 10,
+	  alignSelf: 'stretch',
+	  justifyContent: 'center'
+	},
+	roomInput: {
+	  height: 36,
+	  padding: 4,
+	  marginRight: 5,
+	  flex: 4,
+	  fontSize: 18,
+	  borderWidth: 1,
+	  borderColor: '#48BBEC',
+	  borderRadius: 8,
+	  color: '#48BBEC'
+	}
 });
 
 AppRegistry.registerComponent('RCTWebRTCDemo', () => RCTWebRTCDemo);
