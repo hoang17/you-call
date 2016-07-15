@@ -12,6 +12,7 @@ import {
   View,
   TextInput,
   ListView,
+  KeyboardAvoidingView,
 } from 'react-native';
 import io from 'socket.io-client/socket.io';
 import {
@@ -276,7 +277,7 @@ const RCTWebRTCDemo = React.createClass({
     return {
       info: 'Initializing',
       status: 'init',
-      roomID: 'friend-name',
+      roomID: 'abc',
       isFront: true,
       selfViewSrc: null,
       remoteList: {},
@@ -317,8 +318,10 @@ const RCTWebRTCDemo = React.createClass({
   },
   _renderTextRoom() {
     return (
-      <View style={{padding: 10, marginBottom: 10, left:0, right:0, bottom:-50, position:'absolute'}}>
+      <KeyboardAvoidingView behavior='padding' style={styles.chatBox}>
         <ListView
+          enableEmptySections={true}
+          style={{marginBottom:10}}
           dataSource={this.ds.cloneWithRows(this.state.textRoomData)}
           renderRow={rowData =>
             <View style={styles.row}>
@@ -341,7 +344,7 @@ const RCTWebRTCDemo = React.createClass({
             <Text style={styles.buttonText}>Send</Text>
           </TouchableHighlight>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     );
   },
   render() {
@@ -376,6 +379,14 @@ const RCTWebRTCDemo = React.createClass({
 });
 
 const styles = StyleSheet.create({
+  chatBox: {
+    padding: 10,
+    left:0,
+    right:0,
+    bottom:220,
+    position:'absolute',
+    height:200
+  },
   row: {
     flexDirection: 'row',
     padding: 3,
@@ -389,8 +400,9 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 30,
-    marginTop: 65,
-    alignItems: 'center'
+    alignItems: 'center',
+    marginTop:60,
+    flex:1
   },
   flowRight: {
 	  flexDirection: 'row',
