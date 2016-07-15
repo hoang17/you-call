@@ -320,7 +320,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		13B07FAE1A68108700A75B9A /* RCTWebRTCDemo */ = {
+		13B07FAE1A68108700A75B9A /* YouCall */ = {
 			isa = PBXGroup;
 			children = (
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
@@ -331,7 +331,7 @@
 				13B07FB11A68108700A75B9A /* LaunchScreen.xib */,
 				13B07FB71A68108700A75B9A /* main.m */,
 			);
-			name = RCTWebRTCDemo;
+			name = YouCall;
 			sourceTree = "<group>";
 		};
 		146834001AC3E56700842450 /* Products */ = {
@@ -399,7 +399,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				13B07FAE1A68108700A75B9A /* RCTWebRTCDemo */,
+				13B07FAE1A68108700A75B9A /* YouCall */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* RCTWebRTCDemoTests */,
 				83CBBA001A601CBA00E9B192 /* Products */,
@@ -827,6 +827,7 @@
 					"-ObjC",
 					"-lc++",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ping.youcall;
 				PRODUCT_NAME = RCTWebRTCDemo;
 			};
 			name = Debug;
@@ -850,6 +851,7 @@
 					"-ObjC",
 					"-lc++",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ping.youcall;
 				PRODUCT_NAME = RCTWebRTCDemo;
 			};
 			name = Release;
