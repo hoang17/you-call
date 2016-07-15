@@ -25,19 +25,19 @@
    * OPTION 1 - For stagging or release
    * Load from CodePush bundled
    */
-  
+
 //    jsCodeLocation = [CodePush bundleURL];
-  
+
   /**
    * OPTION 2 - For debugging
    * Load from development server
    * Make sure your computer and iOS device are
    * on the same Wi-Fi network.
    */
-  
-  [[RCTBundleURLProvider sharedSettings] setDefaults];
-  jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
-  
+
+  // [[RCTBundleURLProvider sharedSettings] setDefaults];
+  // jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+
   /**
    * OPTION 3 - For offline
    * Load from pre-bundled file on disk. The static bundle is automatically
@@ -45,9 +45,9 @@
    * running the project on an actual device or running the project on the
    * simulator in the "Release" build configuration.
    */
-  
-//  jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
-  
+
+ jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
                                                       moduleName:@"RCTWebRTCDemo"
