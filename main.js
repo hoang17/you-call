@@ -318,7 +318,7 @@ const RCTWebRTCDemo = React.createClass({
   },
   _renderTextRoom() {
     return (
-      <KeyboardAvoidingView behavior='padding' style={styles.chatBox}>
+      <View style={styles.chatBox}>
         <ListView
           enableEmptySections={true}
           style={{marginBottom:10}}
@@ -344,35 +344,37 @@ const RCTWebRTCDemo = React.createClass({
             <Text style={styles.buttonText}>Send</Text>
           </TouchableHighlight>
         </View>
-      </KeyboardAvoidingView>
+      </View>
     );
   },
   render() {
     return (
-      <View style={styles.container}>
-        <Text style={styles.description}>
-          {this.state.info}
-        </Text>
-        {this.state.textRoomConnected && this._renderTextRoom()}
-        { this.state.status == 'ready' ?
-          (<View style={styles.flowRight}>
-            <TextInput
-              ref='roomID'
-              autoCorrect={false}
-              style={styles.roomInput}
-              onChangeText={(text) => this.setState({roomID: text})}
-              value={this.state.roomID}
-              placeholder='friend name'
-            />
+      <View style={styles.outerContainer}>
+        <KeyboardAvoidingView behavior='padding' style={styles.container}>
+          <View>
+            <Text style={styles.description}>{this.state.info}</Text>
+          </View>
+          {this.state.textRoomConnected && this._renderTextRoom()}
+          { this.state.status == 'ready' ?
+            (<View style={styles.flowRight}>
+              <TextInput
+                ref='roomID'
+                autoCorrect={false}
+                style={styles.roomInput}
+                onChangeText={(text) => this.setState({roomID: text})}
+                value={this.state.roomID}
+                placeholder='friend name'
+              />
 
-            <TouchableHighlight style={styles.button}
-    				    underlayColor='#99d9f4'
-    						onPress={this._press}
-    				    >
-    				  <Text style={styles.buttonText}>Call</Text>
-    				</TouchableHighlight>
-          </View>) : null
-        }
+              <TouchableHighlight style={styles.button}
+      				    underlayColor='#99d9f4'
+      						onPress={this._press}
+      				    >
+      				  <Text style={styles.buttonText}>Call</Text>
+      				</TouchableHighlight>
+            </View>) : null
+          }
+        </KeyboardAvoidingView>
       </View>
     );
   }
@@ -380,11 +382,7 @@ const RCTWebRTCDemo = React.createClass({
 
 const styles = StyleSheet.create({
   chatBox: {
-    padding: 10,
-    left:0,
-    right:0,
-    bottom:220,
-    position:'absolute',
+    alignSelf: 'stretch',
     height:200
   },
   row: {
@@ -398,10 +396,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#656565'
   },
+  outerContainer: {
+    flex: 1,
+  },
   container: {
-    padding: 30,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop:60,
+    padding: 20,
     flex:1
   },
   flowRight: {
