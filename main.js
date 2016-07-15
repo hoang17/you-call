@@ -27,20 +27,12 @@ import {
 
 const socket = io.connect('youcall.io', {transports: ['websocket']});
 const configuration = {iceServers: [
-  {url: "stun:stun.l.google.com:19302"},
-  {url:"stun:stun.services.mozilla.com"},
-  {url:'stun:stun.ekiga.net'},
-  {url:'stun:stun.ideasip.com'},
-  {url:'stun:stun.schlund.de'},
-  {url:'stun:stun.voiparound.com'},
-  {url:'stun:stun.voipbuster.com'},
-  {url:'stun:stun.voipstunt.com'},
-  {url:'stun:stun.voxgratia.org'},
-  {url:'stun:23.21.150.121'},
+  {url:'stun:stun.l.google.com:19302'},
   {url:'stun:stun1.l.google.com:19302'},
   {url:'stun:stun2.l.google.com:19302'},
   {url:'stun:stun3.l.google.com:19302'},
   {url:'stun:stun4.l.google.com:19302'},
+  {url:'stun:stun.services.mozilla.com'},
   {
     url: 'turn:188.166.191.174:3478',
     credential: 'otoke123',
