@@ -284,37 +284,6 @@ const RCTWebRTCDemo = React.createClass({
     }
     this.setState({textRoomData, textRoomValue: ''});
   },
-  _renderTextRoom() {
-    return (
-      <View style={styles.chatBox}>
-        <ListView
-          enableEmptySections={true}
-          style={{marginBottom:10}}
-          dataSource={this.ds.cloneWithRows(this.state.textRoomData)}
-          renderRow={rowData =>
-            <View style={styles.row}>
-              <Text style={styles.text}>
-                {`${rowData.user}: ${rowData.message}`}
-              </Text>
-            </View>
-          }
-        />
-        <View style={styles.flowRight}>
-          <TextInput
-            style={styles.roomInput}
-            onChangeText={value => this.setState({textRoomValue: value})}
-            value={this.state.textRoomValue}
-          />
-          <TouchableHighlight style={styles.button}
-              underlayColor='#99d9f4'
-              onPress={this._textRoomPress}
-              >
-            <Text style={styles.buttonText}>Send</Text>
-          </TouchableHighlight>
-        </View>
-      </View>
-    );
-  },
   render() {
     return (
       <View style={styles.outerContainer}>
@@ -322,7 +291,34 @@ const RCTWebRTCDemo = React.createClass({
           <View>
             <Text style={styles.description}>{this.state.info}</Text>
           </View>
-          {this.state.textRoomConnected && this._renderTextRoom()}
+          {this.state.textRoomConnected ?
+            <View style={styles.chatBox}>
+              <ListView
+                enableEmptySections={true}
+                style={{marginBottom:10}}
+                dataSource={this.ds.cloneWithRows(this.state.textRoomData)}
+                renderRow={rowData =>
+                  <View style={styles.row}>
+                    <Text style={styles.text}>
+                      {`${rowData.user}: ${rowData.message}`}
+                    </Text>
+                  </View>
+                }
+              />
+              <View style={styles.flowRight}>
+                <TextInput
+                  style={styles.roomInput}
+                  onChangeText={value => this.setState({textRoomValue: value})}
+                  value={this.state.textRoomValue}
+                />
+                <TouchableHighlight style={styles.button}
+                    underlayColor='#99d9f4'
+                    onPress={this._textRoomPress}
+                    >
+                  <Text style={styles.buttonText}>Send</Text>
+                </TouchableHighlight>
+              </View>
+            </View> : null}
           { this.state.status == 'ready' ?
             (<View style={styles.flowRight}>
               <TextInput
