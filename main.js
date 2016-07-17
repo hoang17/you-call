@@ -25,30 +25,43 @@ import {
   getUserMedia,
 } from 'react-native-webrtc';
 
-const socket = io.connect('youcall.io', {transports: ['websocket']});
-const configuration = {"iceServers": [
 
-    {
-    	url: 'turn:188.166.191.174:3478',
-    	credential: 'otoke123',
-    	username: 'client'
-    },
-
-    {
-	url: 'turn:numb.viagenie.ca',
-	credential: 'youcal123',
-	username: 'jinnguyen019@gmail.com'
-},
-    {url:"stun:188.166.191.174:3478"},
-    {url:'stun:stun.l.google.com:19302'},
-    {url:'stun:stun1.l.google.com:19302'},
-    {url:'stun:stun2.l.google.com:19302'},
-    {url:'stun:stun3.l.google.com:19302'},
-    {url:'stun:stun4.l.google.com:19302'},
-
-
-
+const socket = io.connect('youcall.herokuapp.com/', {transports: ['websocket']});
+const configuration = {iceServers: [
+  {url:'stun:stun.l.google.com:19302'},
+  {url:'stun:stun1.l.google.com:19302'},
+  {url:'stun:stun2.l.google.com:19302'},
+  {url:'stun:stun3.l.google.com:19302'},
+  {url:'stun:stun4.l.google.com:19302'},
+  {url:'stun:stun.services.mozilla.com'},
+  {
+    url: 'turn:188.166.191.174:3478',
+    credential: 'otoke123',
+    username: 'client'
+  },
+  {
+  	url: 'turn:numb.viagenie.ca',
+  	credential: 'youcal123',
+  	username: 'jinnguyen019@gmail.com'
+  },
+  {
+    url: 'turn:numb.viagenie.ca',
+    credential: '123123',
+    username: 'lehuyhoang117@gmail.com'
+  },
 ]};
+
+
+// @hoang load turn dynamically
+fetch("https://computeengineondemand.appspot.com/turn?username=iapprtc&key=4080218913", { method: "GET" })
+.then((response) => response.json())
+.then((item) => {
+  if (!item.uris) return
+  item.uris.forEach(function(url){
+    configuration.iceServers.push({ username: item.username, credential: item.password, url: url})
+  })
+}).done();
+
 const pcPeers = {};
 let localStream;
 
@@ -126,7 +139,7 @@ function createPC(socketId, isOffer) {
   };
 
   pc.ondatachannel = function(event){
-    console.log("### pc.ondatachannel ###", event.data);
+    console.log("### ondatachannel ###");
     // dataChannel = event.channel;
     // dataChannel.onmessage = function (event) {
     //   console.log("dataChannel.onmessage:", event.data);
@@ -149,7 +162,6 @@ function createPC(socketId, isOffer) {
   pc.addStream(localStream);
 
   function createDataChannel() {
-    console.log('$$$ createDataChannel $$$', pc.textDataChannel);
 
     if (pc.textDataChannel) {
       return;
