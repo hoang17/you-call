@@ -6,11 +6,12 @@
     "start": "node node_modules/react-native/local-cli/cli.js start"
   },
   "dependencies": {
+    "flow-bin": "^0.28.0",
     "react": "15.2.0",
     "react-native": "^0.29.0",
     "react-native-code-push": "^1.13.2-beta",
+    "react-native-fabric-digits": "github:jeanlebrument/react-native-fabric-digits",
     "react-native-webrtc": "^0.8.0",
-    "socket.io-client": "^1.3.7",
-    "flow-bin": "^0.28.0"
+    "socket.io-client": "^1.3.7"
   }
 }

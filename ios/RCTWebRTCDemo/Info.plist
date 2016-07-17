@@ -22,6 +22,25 @@
 	<string>1</string>
 	<key>CodePushDeploymentKey</key>
 	<string>8giV5HG-uJT34qnsG0JS44sRQJgaVJ3oyvFUZ</string>
+	<key>Fabric</key>
+	<dict>
+		<key>APIKey</key>
+		<string>760c29ab82110dbaf2e1bfaf9f51eab6c2b050c8</string>
+		<key>Kits</key>
+		<array>
+			<dict>
+				<key>KitInfo</key>
+				<dict>
+					<key>consumerKey</key>
+					<string>neLl9eIPi2VCQwaWE2zpiAsrj</string>
+					<key>consumerSecret</key>
+					<string>d3vNfyNmUaMVqmypcgRYD1nNc6Lvv2sECOSouxhwAEsquDHZm9</string>
+				</dict>
+				<key>KitName</key>
+				<string>Digits</string>
+			</dict>
+		</array>
+	</dict>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>

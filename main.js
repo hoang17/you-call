@@ -25,7 +25,7 @@ import {
   getUserMedia,
 } from 'react-native-webrtc';
 
-const socket = io.connect('youcall.io', {transports: ['websocket']});
+const socket = io.connect('youcall.herokuapp.com/', {transports: ['websocket']});
 const configuration = {iceServers: [
   {url:'stun:stun.l.google.com:19302'},
   {url:'stun:stun1.l.google.com:19302'},

@@ -12,6 +12,8 @@
 #import "CodePush.h"
 #import "RCTBundleURLProvider.h"
 #import "RCTRootView.h"
+#import <Fabric/Fabric.h>
+#import <DigitsKit/DigitsKit.h>
 
 @implementation AppDelegate
 
@@ -36,8 +38,8 @@
    */
 
 
-  // [[RCTBundleURLProvider sharedSettings] setDefaults];
-  // jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+   [[RCTBundleURLProvider sharedSettings] setDefaults];
+   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
 
 
   /**
@@ -50,8 +52,9 @@
 
 
   
-  jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+//  jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
   
+  [Fabric with:@[[Digits class]]];
 
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
