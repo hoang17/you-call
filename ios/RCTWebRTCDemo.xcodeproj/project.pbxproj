@@ -26,6 +26,7 @@
 		372C189B1D3BE599000A5510 /* DigitsKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 372C18971D3BE599000A5510 /* DigitsKit.framework */; };
 		372C189C1D3BE599000A5510 /* DigitsKitResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 372C18981D3BE599000A5510 /* DigitsKitResources.bundle */; };
 		372C189D1D3BE599000A5510 /* TwitterCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 372C18991D3BE599000A5510 /* TwitterCore.framework */; };
+		372C18A41D3BE6BF000A5510 /* libRCTDigitsManager.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 372C18A31D3BE65C000A5510 /* libRCTDigitsManager.a */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		BE003A29903C4D6494E8B0D6 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 79A7DD80845D462E93C6F3D1 /* libz.tbd */; };
 		BF772BB81D2E500700C3B0A8 /* libjingle_peerconnection_revision_build.txt in Resources */ = {isa = PBXBuildFile; fileRef = BF772BB31D2E500700C3B0A8 /* libjingle_peerconnection_revision_build.txt */; };
@@ -108,6 +109,13 @@
 			remoteGlobalIDString = 83CBBA2E1A601D0E00E9B192;
 			remoteInfo = React;
 		};
+		372C18A21D3BE65C000A5510 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 372C189E1D3BE65C000A5510 /* RCTDigitsManager.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4D8BECAE1BDFF0FB000A1462;
+			remoteInfo = RCTDigitsManager;
+		};
 		376C5FDC1D345513004B2143 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = B9D681609C4B4AC9BFF5CCBD /* CodePush.xcodeproj */;
@@ -162,6 +170,7 @@
 		372C18971D3BE599000A5510 /* DigitsKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DigitsKit.framework; sourceTree = "<group>"; };
 		372C18981D3BE599000A5510 /* DigitsKitResources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = DigitsKitResources.bundle; path = DigitsKit.framework/Versions/A/Resources/DigitsKitResources.bundle; sourceTree = "<group>"; };
 		372C18991D3BE599000A5510 /* TwitterCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = TwitterCore.framework; sourceTree = "<group>"; };
+		372C189E1D3BE65C000A5510 /* RCTDigitsManager.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTDigitsManager.xcodeproj; path = "../node_modules/react-native-fabric-digits/ios/RCTDigitsManager.xcodeproj"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		79A7DD80845D462E93C6F3D1 /* libz.tbd */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		7BC9D94F52D44A478C8BFE3E /* libCodePush.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libCodePush.a; sourceTree = "<group>"; };
@@ -225,6 +234,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				372C18A41D3BE6BF000A5510 /* libRCTDigitsManager.a in Frameworks */,
 				BF772BDB1D2E508500C3B0A8 /* libstdc++.tbd in Frameworks */,
 				BF772BD91D2E507E00C3B0A8 /* libsqlite3.tbd in Frameworks */,
 				BF772BD71D2E507600C3B0A8 /* libc.tbd in Frameworks */,
@@ -353,6 +363,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		372C189F1D3BE65C000A5510 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				372C18A31D3BE65C000A5510 /* libRCTDigitsManager.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		376C5FD91D345513004B2143 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -372,6 +390,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				372C189E1D3BE65C000A5510 /* RCTDigitsManager.xcodeproj */,
 				372C18961D3BE599000A5510 /* Fabric.framework */,
 				372C18971D3BE599000A5510 /* DigitsKit.framework */,
 				372C18981D3BE599000A5510 /* DigitsKitResources.bundle */,
@@ -581,6 +600,10 @@
 					ProjectRef = 00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */;
 				},
 				{
+					ProductGroup = 372C189F1D3BE65C000A5510 /* Products */;
+					ProjectRef = 372C189E1D3BE65C000A5510 /* RCTDigitsManager.xcodeproj */;
+				},
+				{
 					ProductGroup = 00C302B61ABCB90400DB3ED1 /* Products */;
 					ProjectRef = 00C302B51ABCB90400DB3ED1 /* RCTGeolocation.xcodeproj */;
 				},
@@ -684,6 +707,13 @@
 			fileType = archive.ar;
 			path = libReact.a;
 			remoteRef = 146834031AC3E56700842450 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		372C18A31D3BE65C000A5510 /* libRCTDigitsManager.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRCTDigitsManager.a;
+			remoteRef = 372C18A21D3BE65C000A5510 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		376C5FDD1D345513004B2143 /* libCodePush.a */ = {
