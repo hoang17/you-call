@@ -1,7 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- */
 'use strict';
 
 import React, { Component } from 'react';
@@ -16,25 +12,39 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 
+var MainView = require("./main");
+
 var Digits = require('react-native-fabric-digits');
 var { DigitsLoginButton, DigitsLogoutButton } = Digits;
 
-var DigitsLogin = React.createClass({
-  getInitialState: function() {
-    return {
+class LoginView extends Component{
+
+  // static propTypes = {
+  //   title: PropTypes.string.isRequired,
+  //   navigator: PropTypes.object.isRequired,
+  // }
+
+  constructor(props) {
+    super(props);
+
+    this.completion = this.completion.bind(this);
+    // this._onForward = this._onForward.bind(this);
+    // this._onBack = this._onBack.bind(this);
+
+    this.state = {
       logged: false,
       error: false,
       response: {}
     };
-  },
+  }
 
-  completion: function(error, response) {
+  completion(error, response) {
     if (error && error.code !== 1) {
       this.setState({ logged: false, error: true, response: {} });
     }
     else if (response) {
-      var logged = JSON.stringify(response) === '{}' ? false : true;
-      this.setState({ logged: logged, error: false, response: response });
+      // var logged = JSON.stringify(response) === '{}' ? false : true;
+      // this.setState({ logged: logged, error: false, response: response });
 
       fetch('https://api.digits.com/1.1/sdk/account.json', {
         method: 'GET',
@@ -48,14 +58,21 @@ var DigitsLogin = React.createClass({
       .then((responseJson) => {
         // return responseJson.movies;
         console.log(responseJson);
+
+        this.props.navigator.push({
+          title: "Main",
+          component: MainView,
+          passProps: {phone: responseJson.phone_number},
+        });
+
       })
       .catch((error) => {
         console.error(error);
       });
     }
-  },
+  }
 
-  render: function() {
+  render() {
     var error = this.state.error ? <Text>An error occured.</Text> : null;
     var content = this.state.logged ?
       (<View>
@@ -96,7 +113,7 @@ var DigitsLogin = React.createClass({
           }
         }}
         completion={this.completion}
-        text="Login (Do it)"
+        text="Login"
         buttonStyle={styles.DigitsAuthenticateButton}
         textStyle={styles.DigitsAuthenticateButtonText}/>);
     return (
@@ -106,7 +123,8 @@ var DigitsLogin = React.createClass({
       </View>
     );
   }
-});
+}
+
 var styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -129,4 +147,4 @@ var styles = StyleSheet.create({
   }
 });
 
-AppRegistry.registerComponent('DigitsLogin', () => DigitsLogin);
+module.exports = LoginView
