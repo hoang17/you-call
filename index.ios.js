@@ -4,4 +4,5 @@ if (!window.navigator.userAgent) {
 }
 // @hoang add RCTLog because error with CodePush
 var RCTLog = require('RCTLog');
-require('./main');
+// require('./main');
+require('./login');
