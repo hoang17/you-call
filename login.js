@@ -19,17 +19,10 @@ var { DigitsLoginButton, DigitsLogoutButton } = Digits;
 
 class LoginView extends Component{
 
-  // static propTypes = {
-  //   title: PropTypes.string.isRequired,
-  //   navigator: PropTypes.object.isRequired,
-  // }
-
   constructor(props) {
     super(props);
 
     this.completion = this.completion.bind(this);
-    // this._onForward = this._onForward.bind(this);
-    // this._onBack = this._onBack.bind(this);
 
     this.state = {
       logged: false,
@@ -43,8 +36,8 @@ class LoginView extends Component{
       this.setState({ logged: false, error: true, response: {} });
     }
     else if (response) {
-      // var logged = JSON.stringify(response) === '{}' ? false : true;
-      // this.setState({ logged: logged, error: false, response: response });
+      var logged = JSON.stringify(response) === '{}' ? false : true;
+      this.setState({ logged: logged, error: false, response: response });
 
       fetch('https://api.digits.com/1.1/sdk/account.json', {
         method: 'GET',
@@ -76,10 +69,6 @@ class LoginView extends Component{
     var error = this.state.error ? <Text>An error occured.</Text> : null;
     var content = this.state.logged ?
       (<View>
-        <Text>
-          Auth Token: {this.state.response.authToken}{'\n'}
-          Auth Token Secret: {this.state.response.authTokenSecret}{'\n\n'}
-        </Text>
         <DigitsLogoutButton
           completion={this.completion}
           text="Logout"
