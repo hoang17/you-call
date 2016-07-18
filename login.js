@@ -22,7 +22,8 @@ class LoginView extends Component{
   constructor(props) {
     super(props);
 
-    this.completion = this.completion.bind(this);
+    this.onLogin = this.onLogin.bind(this);
+    this.onLogout = this.onLogout.bind(this);
 
     this.state = {
       logged: false,
@@ -31,7 +32,7 @@ class LoginView extends Component{
     };
   }
 
-  completion(error, response) {
+  onLogin(error, response) {
     if (error && error.code !== 1) {
       this.setState({ logged: false, error: true, response: {} });
     }
@@ -65,28 +66,38 @@ class LoginView extends Component{
     }
   }
 
+  onLogout(error, response) {
+    if (error && error.code !== 1) {
+      this.setState({ logged: false, error: true, response: {} });
+    }
+    else if (response) {
+      var logged = JSON.stringify(response) === '{}' ? false : true;
+      this.setState({ logged: logged, error: false, response: response });
+    }
+  }
+
   render() {
     var error = this.state.error ? <Text>An error occured.</Text> : null;
     var content = this.state.logged ?
       (<View>
         <DigitsLogoutButton
-          completion={this.completion}
+          completion={this.onLogout}
           text="Logout"
           buttonStyle={styles.DigitsAuthenticateButton}
           textStyle={styles.DigitsAuthenticateButtonText}/>
       </View>) : (<DigitsLoginButton
         options={{
-          title: "Logging in is great",
-          phoneNumber: "+61",
+          title: "YouCall",
+          phoneNumber: "+84",
           appearance: {
-            backgroundColor: {
-              hex: "#ffffff",
-              alpha: 1.0
-            },
-            accentColor: {
-              hex: "#43a16f",
-              alpha: 0.7
-            },
+            // backgroundColor: {
+            //   hex: "#ffffff",
+            //   alpha: 1.0
+            // },
+            // accentColor: {
+            //   hex: "#43a16f",
+            //   alpha: 0.7
+            // },
             headerFont: {
               name: "Arial",
               size: 16
@@ -101,7 +112,7 @@ class LoginView extends Component{
             }
           }
         }}
-        completion={this.completion}
+        completion={this.onLogin}
         text="Login"
         buttonStyle={styles.DigitsAuthenticateButton}
         textStyle={styles.DigitsAuthenticateButtonText}/>);
