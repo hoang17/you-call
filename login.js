@@ -12,10 +12,11 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 
-var MainView = require("./main");
-
 var Digits = require('react-native-fabric-digits');
 var { DigitsLoginButton, DigitsLogoutButton } = Digits;
+
+var MainView = require("./main");
+
 
 class LoginView extends Component{
 
