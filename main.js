@@ -303,7 +303,7 @@ class MainView extends Component{
       <View style={styles.outerContainer}>
         <KeyboardAvoidingView behavior='padding' style={styles.container}>
           <View>
-            <Text>Hello {this.props.phone}!</Text>
+            <Text style={styles.description}>{this.props.phone}</Text>
             <Text style={styles.description}>{this.state.info}</Text>
           </View>
           {this.state.textRoomConnected ?
