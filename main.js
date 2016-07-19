@@ -231,7 +231,7 @@ class MainView extends Component{
       pc = pcPeers[fromId];
     } else {
       console.log('@@@ exchange pc @@@', fromId)
-      pc = createPC(fromId, false);
+      pc = container.createPC(fromId, false);
     }
 
     if (data.sdp) {
@@ -305,12 +305,14 @@ class MainView extends Component{
 
   _syncContacts(){
     AddressBook.getContacts( (err, contacts) => {
-      console.log('GET CONTACTS', err, contacts)
       if(err && err.type === 'permissionDenied'){
         // x.x
       }
       else{
-        container.setState({contacts: contacts})
+        socket.emit('sync contacts', contacts, function(activeContacts){
+          console.log('activeContacts', activeContacts);
+          container.setState({contacts: activeContacts})
+        });
       }
     })
   }

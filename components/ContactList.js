@@ -32,11 +32,11 @@ module.exports = React.createClass({
               fullName += lastName;
           }
           return (
-            <View style={{backgroundColor: 'rgba(0,0,0,.1)', margin: 5, padding:5,}}>
+            <View style={{backgroundColor: 'rgba(0,0,0,.1)', margin: 5, padding:5,}} key={contact.recordID}>
               <Text>{fullName}</Text>
               {contact.phoneNumbers.map((e) => {
                 return (
-                  <Text>{e.label}: {e.number}</Text>
+                  <Text key={e.number}>{e.label}: {e.number}</Text>
                 )
               })}
             </View>
