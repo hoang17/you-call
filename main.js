@@ -103,11 +103,10 @@ class MainView extends Component{
       console.log('user', u);
       user = u;
     });
-    socket.on('call', function(roomId) {
-      console.log('call', roomId);
-      if (roomId) {
-        container.join(roomId);
-      }
+    socket.on('call', function(data) {
+      alert(data.fromNumber + ' is calling...')
+      console.log('call', data);
+      container.join(data.roomId);
     });
   }
 
