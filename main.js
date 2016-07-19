@@ -100,7 +100,7 @@ class MainView extends Component{
       container.getLocalStream(true, function(stream) {
         localStream = stream;
         container.setState({selfViewSrc: stream.toURL()});
-        container.setState({status: 'ready', info: 'Enter friend name to call'});
+        container.setState({status: 'ready', info: ''});
       });
     });
 
@@ -282,27 +282,6 @@ class MainView extends Component{
     container.join(container.state.roomID);
   }
 
-  receiveTextData(data) {
-    const textRoomData = container.state.textRoomData.slice();
-    textRoomData.push(data);
-    container.setState({textRoomData, textRoomValue: ''});
-  }
-
-  _textRoomPress() {
-    if (!container.state.textRoomValue) {
-      return
-    }
-    const textRoomData = container.state.textRoomData.slice();
-    textRoomData.push({user: "me", message: container.state.textRoomValue});
-    for (const key in pcPeers) {
-      const pc = pcPeers[key];
-      pc.textDataChannel.send(container.state.textRoomValue);
-      console.log('textDataChannel.readyState', pc.textDataChannel.readyState)
-      console.log('send', container.state.textRoomValue)
-    }
-    container.setState({textRoomData, textRoomValue: ''});
-  }
-
   _syncContacts(){
     AddressBook.getContacts( (err, contacts) => {
       if(err && err.type === 'permissionDenied'){
@@ -322,38 +301,9 @@ class MainView extends Component{
       <View style={styles.outerContainer}>
         <KeyboardAvoidingView behavior='padding' style={styles.container}>
           <View>
-            <Text style={styles.description}>{this.props.phone}</Text>
-            <Text style={styles.description}>{this.state.info}</Text>
+            <Text style={styles.description}>{this.props.phone} {this.state.info}</Text>
           </View>
-          {this.state.textRoomConnected ?
-            <View style={styles.chatBox}>
-              <ListView
-                enableEmptySections={true}
-                style={{marginBottom:10}}
-                dataSource={this.ds.cloneWithRows(this.state.textRoomData)}
-                renderRow={rowData =>
-                  <View style={styles.row}>
-                    <Text style={styles.text}>
-                      {`${rowData.user}: ${rowData.message}`}
-                    </Text>
-                  </View>
-                }
-              />
-              <View style={styles.flowRight}>
-                <TextInput
-                  style={styles.roomInput}
-                  onChangeText={value => this.setState({textRoomValue: value})}
-                  value={this.state.textRoomValue}
-                />
-                <TouchableHighlight style={styles.button}
-                    underlayColor='#99d9f4'
-                    onPress={this._textRoomPress}
-                    >
-                  <Text style={styles.buttonText}>Send</Text>
-                </TouchableHighlight>
-              </View>
-            </View> : null}
-          { this.state.status == 'ready' ?
+          {/*{ this.state.status == 'ready' ?
             (<View style={styles.flowRight}>
               <TextInput
                 ref='roomID'
@@ -363,7 +313,6 @@ class MainView extends Component{
                 value={this.state.roomID}
                 placeholder='friend name'
               />
-
               <TouchableHighlight style={styles.button}
       				    underlayColor='#99d9f4'
       						onPress={this._press}
@@ -371,7 +320,7 @@ class MainView extends Component{
       				  <Text style={styles.buttonText}>Call</Text>
       				</TouchableHighlight>
             </View>) : null
-          }
+          }*/}
           <View style={styles.flowRight}>
             <TouchableHighlight style={styles.button}
                 underlayColor='#99d9f4'
@@ -381,7 +330,7 @@ class MainView extends Component{
             </TouchableHighlight>
           </View>
           <View style={styles.contacts}>
-            <ContactList contacts={this.state.contacts} />
+            <ContactList contacts={this.state.contacts} callback={this._call} />
           </View>
         </KeyboardAvoidingView>
       </View>
@@ -394,15 +343,6 @@ function logError(error) {
 }
 
 const styles = StyleSheet.create({
-  chatBox: {
-    alignSelf: 'stretch',
-    height:200
-  },
-  row: {
-    flexDirection: 'row',
-    padding: 3,
-    backgroundColor: '#F6F6F6',
-  },
   description: {
     marginBottom: 10,
     fontSize: 18,
