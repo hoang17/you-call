@@ -25,13 +25,13 @@ class LoginView extends Component{
     super(props);
 
     AsyncStorage.getItem("phone").then((phone) => {
-
-      this.props.navigator.push({
-        title: "Main",
-        component: MainView,
-        passProps: {phone: phone},
-      });
-
+      if (phone){
+        this.props.navigator.push({
+          title: "Main",
+          component: MainView,
+          passProps: {phone: phone},
+        });
+      }
     }).done();
 
     this.onLogin = this.onLogin.bind(this);
