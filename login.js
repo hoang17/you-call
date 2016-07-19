@@ -63,17 +63,19 @@ class LoginView extends Component{
       .then((response) => response.json())
       .then((responseJson) => {
         // return responseJson.movies;
-        console.log(responseJson);
+        console.log('ditgits response', responseJson);
 
         var phone = responseJson.phone_number;
 
-        AsyncStorage.setItem('phone', phone);
+        if (phone){
+          AsyncStorage.setItem('phone', phone);
 
-        this.props.navigator.push({
-          title: "Main",
-          component: MainView,
-          passProps: {phone: phone},
-        });
+          this.props.navigator.push({
+            title: "Main",
+            component: MainView,
+            passProps: {phone: phone},
+          });  
+        }
 
       })
       .catch((error) => {
