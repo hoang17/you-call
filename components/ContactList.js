@@ -11,12 +11,14 @@ import {
 module.exports = React.createClass({
 
   render(){
-    if(this.props.contacts.lengh == 0){
+    var keys = Object.keys(this.props.contacts);
+    if(keys.length == 0){
       return <Text>No Contacts Loaded</Text>
     }
     return (
       <ScrollView>
-        {this.props.contacts.map((contact) => {
+        {keys.map((key) => {
+          var contact = this.props.contacts[key];
           if (contact.phoneNumbers.length == 0 || contact.phoneNumbers.length > 10) {
             return
           }

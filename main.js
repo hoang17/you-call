@@ -102,9 +102,12 @@ class MainView extends Component{
       container.setState({contacts: data.contacts});
     });
     socket.on('call', function(data) {
-      alert(data.fromNumber + ' is calling...')
+      // alert(data.fromNumber + ' is calling...')
       console.log('call', data);
       container.join(data.roomId);
+      console.log('contacts', container.state.contacts);
+      console.log('userId', data.from);
+      container.setState({status: 'connect', info: container.state.contacts[data.from].fullName + ' is calling...'});
     });
   }
 
@@ -271,22 +274,23 @@ class MainView extends Component{
         // x.x
       }
       else{
-        // container.setState({contacts: contacts});
+        container.setState({status: 'ready', info:'begin syncing ' + contacts.length +' contacts...'});
         socket.emit('sync contacts', contacts, function(activeContacts){
           console.log('activeContacts', activeContacts);
           container.setState({contacts: activeContacts});
+          container.setState({status: 'ready', info:'found ' + Object.keys(activeContacts).length +' active contacts'});
         });
       }
     })
   }
 
   _call(contact){
-    container.setState({status: 'connect', info: 'Calling ' + contact.fullName});
-    alert('Calling ' + contact.fullName);
+    // alert('Calling ' + contact.fullName);
     var to = contact.userId;
     var roomId = user._id;
     socket.emit('call', {'to': to, 'roomId': roomId  });
     container.join(roomId);
+    container.setState({status: 'connect', info: 'Calling ' + contact.fullName + '...'});
   }
 
   _hangup(){
