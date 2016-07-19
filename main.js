@@ -66,9 +66,7 @@ class MainView extends Component{
     this.state = {
       info: 'Initializing',
       status: 'init',
-      roomID: 'abc',
       remoteList: {},
-      socketId:'',
       contacts:[],
     };
 
@@ -95,7 +93,7 @@ class MainView extends Component{
       console.log('connect', socket.id);
       container.getLocalStream(function(stream) {
         localStream = stream;
-        container.setState({status: 'ready', info: ''});
+        container.setState({status: 'ready', info: container.props.phone});
       });
     });
     socket.on('user', function(data) {
@@ -136,8 +134,6 @@ class MainView extends Component{
 
   createPC(socketId, isOffer) {
 
-    container.setState({socketId: socketId})
-
     const pc = new RTCPeerConnection(configuration);
     pcPeers[socketId] = pc;
 
@@ -155,13 +151,14 @@ class MainView extends Component{
     }
     pc.oniceconnectionstatechange = function(event) {
       console.log('*** oniceconnectionstatechange ***', event.target.iceConnectionState);
-      if (event.target.iceConnectionState === 'completed') {
-        setTimeout(() => {
-          container.getStats();
-        }, 1000);
+
+      if (event.target.iceConnectionState === 'disconnected') {
+        container._hangup()
       }
+
       if (event.target.iceConnectionState === 'connected') {
-        createDataChannel();
+        container.setState({status: 'connected', info: 'Peer connected'});
+        // createDataChannel();
       }
     };
     pc.onsignalingstatechange = function(event) {
@@ -177,7 +174,7 @@ class MainView extends Component{
     }
     pc.onaddstream = function (event) {
       console.log('onaddstream', event.stream);
-      container.setState({info: 'One peer join ' + socketId});
+      container.setState({info: 'Peer joined'});
 
       const remoteList = container.state.remoteList;
       remoteList[socketId] = event.stream.toURL();
@@ -188,33 +185,33 @@ class MainView extends Component{
     };
     pc.addStream(localStream);
 
-    function createDataChannel() {
-
-      if (pc.textDataChannel) {
-        return;
-      }
-
-      var dataChannel = pc.createDataChannel("text");
-
-      dataChannel.onerror = function (error) {
-        console.log("dataChannel.onerror", error);
-      };
-
-      dataChannel.onmessage = function (event) {
-        console.log("dataChannel.onmessage:", event.data);
-        container.receiveTextData({user: socketId, message: event.data});
-      };
-
-      dataChannel.onopen = function () {
-        console.log('dataChannel.onopen');
-      };
-
-      dataChannel.onclose = function () {
-        console.log("dataChannel.onclose");
-      };
-
-      pc.textDataChannel = dataChannel;
-    }
+    // function createDataChannel() {
+    //
+    //   if (pc.textDataChannel) {
+    //     return;
+    //   }
+    //
+    //   var dataChannel = pc.createDataChannel("text");
+    //
+    //   dataChannel.onerror = function (error) {
+    //     console.log("dataChannel.onerror", error);
+    //   };
+    //
+    //   dataChannel.onmessage = function (event) {
+    //     console.log("dataChannel.onmessage:", event.data);
+    //     container.receiveTextData({user: socketId, message: event.data});
+    //   };
+    //
+    //   dataChannel.onopen = function () {
+    //     console.log('dataChannel.onopen');
+    //   };
+    //
+    //   dataChannel.onclose = function () {
+    //     console.log("dataChannel.onclose");
+    //   };
+    //
+    //   pc.textDataChannel = dataChannel;
+    // }
     function createOffer() {
       pc.createOffer(function(desc) {
         console.log('createOffer', desc);
@@ -258,31 +255,14 @@ class MainView extends Component{
   leave(socketId) {
     console.log('leave', socketId);
     const pc = pcPeers[socketId];
-    const viewIndex = pc.viewIndex;
+    if (!pc) return;
     pc.close();
     delete pcPeers[socketId];
 
     const remoteList = container.state.remoteList;
     delete remoteList[socketId]
     container.setState({ remoteList: remoteList });
-    container.setState({info: 'One peer leave!'});
-  }
-
-  getStats() {
-    const pc = pcPeers[Object.keys(pcPeers)[0]];
-    if (pc.getRemoteStreams && pc.getRemoteStreams()[0] && pc.getRemoteStreams()[0].getAudioTracks()[0]) {
-      const track = pc.getRemoteStreams()[0].getAudioTracks()[0];
-      console.log('track', track);
-      pc.getStats(track, function(report) {
-        console.log('getStats report', report);
-      }, logError);
-    }
-  }
-
-  _press(event) {
-    container.refs.roomID.blur();
-    container.setState({status: 'connect', info: 'Connecting'});
-    container.join(container.state.roomID);
+    container.setState({status: 'hangup', info: container.props.phone});
   }
 
   _syncContacts(){
@@ -301,11 +281,19 @@ class MainView extends Component{
   }
 
   _call(contact){
+    container.setState({status: 'connect', info: 'Calling ' + contact.fullName});
     alert('Calling ' + contact.fullName);
     var to = contact.userId;
     var roomId = user._id;
-    socket.emit('call', {'to': to, 'roomId': roomId  })
+    socket.emit('call', {'to': to, 'roomId': roomId  });
     container.join(roomId);
+  }
+
+  _hangup(){
+    for (var socketId in pcPeers) {
+      container.leave(socketId);
+    }
+    socket.emit('hangup');
   }
 
   render() {
@@ -313,7 +301,7 @@ class MainView extends Component{
       <View style={styles.outerContainer}>
         <KeyboardAvoidingView behavior='padding' style={styles.container}>
           <View>
-            <Text style={styles.description}>{this.props.phone} {this.state.info}</Text>
+            <Text style={styles.description}>{this.state.info}</Text>
           </View>
           <View style={styles.contacts}>
             <ContactList contacts={this.state.contacts} callback={this._call} />
@@ -325,6 +313,13 @@ class MainView extends Component{
                 >
               <Text style={styles.buttonText}>Sync contacts</Text>
             </TouchableHighlight>
+            { this.state.status == 'connected' ?
+            <TouchableHighlight style={styles.button}
+                underlayColor='#99d9f4'
+                onPress={this._hangup}
+                >
+              <Text style={styles.buttonText}>Hang Up</Text>
+            </TouchableHighlight> : null }
           </View>
         </KeyboardAvoidingView>
       </View>
@@ -354,13 +349,12 @@ const styles = StyleSheet.create({
     marginBottom:20
   },
   flowRight: {
-	  flexDirection: 'row',
 	  alignItems: 'center',
 	  alignSelf: 'stretch'
 	},
   contacts: {
     alignSelf: 'stretch',
-    height:350,
+    height:400,
     borderWidth:1,
     borderColor: '#48BBEC',
     borderRadius: 4,

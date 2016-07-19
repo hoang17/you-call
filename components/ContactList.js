@@ -16,7 +16,6 @@ module.exports = React.createClass({
     }
     return (
       <ScrollView>
-        <Text style={{marginTop:-70}}></Text>
         {this.props.contacts.map((contact) => {
           if (contact.phoneNumbers.length == 0 || contact.phoneNumbers.length > 10) {
             return
