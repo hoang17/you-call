@@ -296,6 +296,10 @@ class MainView extends Component{
     })
   }
 
+  _call(contact){
+    alert('Calling ' + contact.fullName);
+  }
+
   render() {
     return (
       <View style={styles.outerContainer}>

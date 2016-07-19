@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 
 module.exports = React.createClass({
+
   render(){
     if(this.props.contacts.lengh === 0){
       return <Text>No Contacts Loaded</Text>
@@ -31,14 +32,15 @@ module.exports = React.createClass({
               }
               fullName += lastName;
           }
+          contact.fullName = fullName;
           return (
-            <View style={{borderWidth:1, borderColor: 'rgba(0,0,0,.1)', margin: 5, padding:5}} key={contact.recordID} onPress={this.props.callback}>
-              <Text style={{padding:5, fontSize:18}}>{fullName}</Text>
+            <View style={{borderWidth:1, borderColor: 'rgba(0,0,0,.1)', margin: 5, padding:5}} key={contact.recordID}>
+              <Text style={{padding:5, fontSize:18}}>{fullName} {contact.phone}</Text>
               {contact.phoneNumbers.map((e) => {
                 return (
                   <TouchableHighlight style={styles.button}
                       underlayColor='#99d9f4'
-                      onPress={this._press}
+                      onPress={this.props.callback.bind(this, contact)}
                       key={e.number}
                       >
                     <Text style={styles.buttonText}>{e.label}: {e.number}</Text>
