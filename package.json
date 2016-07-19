@@ -7,9 +7,9 @@
   },
   "dependencies": {
     "flow-bin": "^0.28.0",
-    "oauth": "^0.9.14",
     "react": "15.2.0",
     "react-native": "^0.29.0",
+    "react-native-addressbook": "^1.3.0",
     "react-native-code-push": "^1.13.2-beta",
     "react-native-fabric-digits": "github:jeanlebrument/react-native-fabric-digits",
     "react-native-webrtc": "^0.8.0",
