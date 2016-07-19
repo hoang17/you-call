@@ -98,9 +98,10 @@ class MainView extends Component{
         container.setState({status: 'ready', info: ''});
       });
     });
-    socket.on('user', function(u) {
-      console.log('user', u);
-      user = u;
+    socket.on('user', function(data) {
+      console.log('user', data.user);
+      user = data.user;
+      container.setState({contacts: data.contacts});
     });
     socket.on('call', function(data) {
       alert(data.fromNumber + ' is calling...')
@@ -314,24 +315,9 @@ class MainView extends Component{
           <View>
             <Text style={styles.description}>{this.props.phone} {this.state.info}</Text>
           </View>
-          {/*{ this.state.status == 'ready' ?
-            (<View style={styles.flowRight}>
-              <TextInput
-                ref='roomID'
-                autoCorrect={false}
-                style={styles.roomInput}
-                onChangeText={(text) => this.setState({roomID: text})}
-                value={this.state.roomID}
-                placeholder='friend name'
-              />
-              <TouchableHighlight style={styles.button}
-      				    underlayColor='#99d9f4'
-      						onPress={this._press}
-      				    >
-      				  <Text style={styles.buttonText}>Call</Text>
-      				</TouchableHighlight>
-            </View>) : null
-          }*/}
+          <View style={styles.contacts}>
+            <ContactList contacts={this.state.contacts} callback={this._call} />
+          </View>
           <View style={styles.flowRight}>
             <TouchableHighlight style={styles.button}
                 underlayColor='#99d9f4'
@@ -339,9 +325,6 @@ class MainView extends Component{
                 >
               <Text style={styles.buttonText}>Sync contacts</Text>
             </TouchableHighlight>
-          </View>
-          <View style={styles.contacts}>
-            <ContactList contacts={this.state.contacts} callback={this._call} />
           </View>
         </KeyboardAvoidingView>
       </View>
@@ -367,7 +350,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    flex:1
+    flex:1,
+    marginBottom:20
   },
   flowRight: {
 	  flexDirection: 'row',
@@ -376,7 +360,7 @@ const styles = StyleSheet.create({
 	},
   contacts: {
     alignSelf: 'stretch',
-    height:300,
+    height:350,
     borderWidth:1,
     borderColor: '#48BBEC',
     borderRadius: 4,
@@ -394,7 +378,7 @@ const styles = StyleSheet.create({
 	  borderColor: '#48BBEC',
 	  borderWidth: 1,
 	  borderRadius: 4,
-	  marginBottom: 10,
+	  marginTop: 10,
 	  alignSelf: 'stretch',
 	  justifyContent: 'center'
 	},

@@ -11,7 +11,7 @@ import {
 module.exports = React.createClass({
 
   render(){
-    if(this.props.contacts.lengh === 0){
+    if(this.props.contacts.lengh == 0){
       return <Text>No Contacts Loaded</Text>
     }
     return (
