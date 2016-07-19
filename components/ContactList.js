@@ -21,7 +21,6 @@ module.exports = React.createClass({
           if (contact.phoneNumbers.length == 0 || contact.phoneNumbers.length > 10) {
             return
           }
-
           var fullName = '';
           if (firstName = contact.firstName) {
               fullName += firstName;
@@ -34,20 +33,19 @@ module.exports = React.createClass({
           }
           contact.fullName = fullName;
           return (
-            <View style={{borderWidth:1, borderColor: 'rgba(0,0,0,.1)', margin: 5, padding:5}} key={contact.recordID}>
-              <Text style={{padding:5, fontSize:18}}>{fullName} {contact.phone}</Text>
-              {contact.phoneNumbers.map((e) => {
-                return (
-                  <TouchableHighlight style={styles.button}
-                      underlayColor='#99d9f4'
-                      onPress={this.props.callback.bind(this, contact)}
-                      key={e.number}
-                      >
-                    <Text style={styles.buttonText}>{e.label}: {e.number}</Text>
-                  </TouchableHighlight>
-
-                )
-              })}
+            <View style={{padding:5}} key={contact.recordID}>
+              <TouchableHighlight
+                style={styles.button}
+                underlayColor='#99d9f4'
+                onPress={this.props.callback.bind(this, contact)}
+                >
+                <Text style={styles.buttonText}>{fullName}</Text>
+                {/*{contact.phoneNumbers.map((e) => {
+                  return (
+                      <Text key={e.number} style={styles.buttonText}>{e.label}: {e.number}</Text>
+                  )
+                })}*/}
+              </TouchableHighlight>
             </View>
           )
         })}
@@ -57,27 +55,6 @@ module.exports = React.createClass({
 });
 
 const styles = StyleSheet.create({
-  outerContainer: {
-    flex: 1,
-  },
-  container: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    flex:1
-  },
-  flowRight: {
-	  flexDirection: 'row',
-	  alignItems: 'center',
-	  alignSelf: 'stretch'
-	},
-  contacts: {
-    alignSelf: 'stretch',
-    height:300,
-    borderWidth:1,
-    borderColor: '#48BBEC',
-    borderRadius: 4,
-  },
 	buttonText: {
 	  fontSize: 18,
 	  color: 'white',
@@ -90,8 +67,7 @@ const styles = StyleSheet.create({
 	  backgroundColor: '#48BBEC',
 	  borderColor: '#48BBEC',
 	  borderWidth: 1,
-	  borderRadius: 4,
-	  marginBottom: 10,
+	  borderRadius: 2,
 	  alignSelf: 'stretch',
 	  justifyContent: 'center'
 	},

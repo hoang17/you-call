@@ -95,7 +95,6 @@ class MainView extends Component{
       console.log('connect', socket.id);
       container.getLocalStream(function(stream) {
         localStream = stream;
-        // container.setState({selfViewSrc: stream.toURL()});
         container.setState({status: 'ready', info: ''});
       });
     });
@@ -291,9 +290,10 @@ class MainView extends Component{
         // x.x
       }
       else{
+        // container.setState({contacts: contacts});
         socket.emit('sync contacts', contacts, function(activeContacts){
           console.log('activeContacts', activeContacts);
-          container.setState({contacts: activeContacts})
+          container.setState({contacts: activeContacts});
         });
       }
     })
