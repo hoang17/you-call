@@ -10,6 +10,7 @@ import {
   TextInput,
   ListView,
   KeyboardAvoidingView,
+  AsyncStorage,
 } from 'react-native';
 
 var Digits = require('react-native-fabric-digits');
@@ -22,6 +23,16 @@ class LoginView extends Component{
 
   constructor(props) {
     super(props);
+
+    AsyncStorage.getItem("phone").then((phone) => {
+
+      this.props.navigator.push({
+        title: "Main",
+        component: MainView,
+        passProps: {phone: phone},
+      });
+
+    }).done();
 
     this.onLogin = this.onLogin.bind(this);
     this.onLogout = this.onLogout.bind(this);
@@ -54,10 +65,14 @@ class LoginView extends Component{
         // return responseJson.movies;
         console.log(responseJson);
 
+        var phone = responseJson.phone_number;
+
+        AsyncStorage.setItem('phone', phone);
+
         this.props.navigator.push({
           title: "Main",
           component: MainView,
-          passProps: {phone: responseJson.phone_number},
+          passProps: {phone: phone},
         });
 
       })
@@ -74,6 +89,7 @@ class LoginView extends Component{
     else if (response) {
       var logged = JSON.stringify(response) === '{}' ? false : true;
       this.setState({ logged: logged, error: false, response: response });
+      AsyncStorage.setItem("phone", null);
     }
   }
 

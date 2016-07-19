@@ -16,6 +16,7 @@ import {
   Text,
   View,
   NavigatorIOS,
+  AsyncStorage,
 } from 'react-native';
 
 var LoginView = require("./login");
@@ -30,7 +31,6 @@ var YouCall = React.createClass({
       return (
           <NavigatorIOS
               style={styles.navigationContainer}
-              //initialRoute={{ title: "Main", component: MainView }}
               initialRoute={{ title: "Login", component: LoginView }}
           />
       );
