@@ -29,6 +29,7 @@ const pcPeers = {};
 let localStream;
 var container;
 var socket;
+var user;
 const configuration = {iceServers: [
   {url:'stun:stun.l.google.com:19302'},
   {url:'stun:stun1.l.google.com:19302'},
@@ -66,12 +67,7 @@ class MainView extends Component{
       info: 'Initializing',
       status: 'init',
       roomID: 'abc',
-      isFront: true,
-      selfViewSrc: null,
       remoteList: {},
-      textRoomConnected: false,
-      textRoomData: [],
-      textRoomValue: '',
       socketId:'',
       contacts:[],
     };
@@ -95,18 +91,27 @@ class MainView extends Component{
     socket.on('leave', function(socketId){
       container.leave(socketId);
     });
-    socket.on('connect', function(data) {
-      console.log('connect');
-      container.getLocalStream(true, function(stream) {
+    socket.on('connect', function() {
+      console.log('connect', socket.id);
+      container.getLocalStream(function(stream) {
         localStream = stream;
-        container.setState({selfViewSrc: stream.toURL()});
+        // container.setState({selfViewSrc: stream.toURL()});
         container.setState({status: 'ready', info: ''});
       });
     });
-
+    socket.on('user', function(u) {
+      console.log('user', u);
+      user = u;
+    });
+    socket.on('call', function(roomId) {
+      console.log('call', roomId);
+      if (roomId) {
+        container.join(roomId);
+      }
+    });
   }
 
-  getLocalStream(isFront, callback) {
+  getLocalStream(callback) {
     MediaStreamTrack.getSources(sourceInfos => {
       console.log(sourceInfos);
       getUserMedia({
@@ -203,7 +208,6 @@ class MainView extends Component{
 
       dataChannel.onopen = function () {
         console.log('dataChannel.onopen');
-        container.setState({textRoomConnected: true});
       };
 
       dataChannel.onclose = function () {
@@ -298,6 +302,10 @@ class MainView extends Component{
 
   _call(contact){
     alert('Calling ' + contact.fullName);
+    var to = contact.userId;
+    var roomId = user._id;
+    socket.emit('call', {'to': to, 'roomId': roomId  })
+    container.join(roomId);
   }
 
   render() {
