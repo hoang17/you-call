@@ -22,6 +22,9 @@ import {
   getUserMedia,
 } from 'react-native-webrtc';
 
+var ContactList = require('./components/ContactList')
+import AddressBook from 'react-native-addressbook'
+
 const pcPeers = {};
 let localStream;
 var container;
@@ -69,7 +72,8 @@ class MainView extends Component{
       textRoomConnected: false,
       textRoomData: [],
       textRoomValue: '',
-      socketId:''
+      socketId:'',
+      contacts:[],
     };
 
     // socket = io.connect('youcall.herokuapp.com', {transports: ['websocket'], query: 'phone='+this.props.phoe});
@@ -299,6 +303,18 @@ class MainView extends Component{
     container.setState({textRoomData, textRoomValue: ''});
   }
 
+  _syncContacts(){
+    AddressBook.getContacts( (err, contacts) => {
+      console.log('GET CONTACTS', err, contacts)
+      if(err && err.type === 'permissionDenied'){
+        // x.x
+      }
+      else{
+        container.setState({contacts: contacts})
+      }
+    })
+  }
+
   render() {
     return (
       <View style={styles.outerContainer}>
@@ -354,6 +370,17 @@ class MainView extends Component{
       				</TouchableHighlight>
             </View>) : null
           }
+          <View style={styles.flowRight}>
+            <TouchableHighlight style={styles.button}
+                underlayColor='#99d9f4'
+                onPress={this._syncContacts}
+                >
+              <Text style={styles.buttonText}>Sync contacts</Text>
+            </TouchableHighlight>
+          </View>
+          <View style={styles.contacts}>
+            <ContactList contacts={this.state.contacts} />
+          </View>
         </KeyboardAvoidingView>
       </View>
     );
@@ -394,6 +421,11 @@ const styles = StyleSheet.create({
 	  alignItems: 'center',
 	  alignSelf: 'stretch'
 	},
+  contacts: {
+    alignSelf: 'stretch',
+    height:300,
+    borderWidth:1
+  },
 	buttonText: {
 	  fontSize: 18,
 	  color: 'white',
