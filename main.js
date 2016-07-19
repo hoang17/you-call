@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F6F6F6',
   },
   description: {
-    marginBottom: 20,
+    marginBottom: 10,
     fontSize: 18,
     textAlign: 'center',
     color: '#656565'
@@ -424,7 +424,9 @@ const styles = StyleSheet.create({
   contacts: {
     alignSelf: 'stretch',
     height:300,
-    borderWidth:1
+    borderWidth:1,
+    borderColor: '#48BBEC',
+    borderRadius: 4,
   },
 	buttonText: {
 	  fontSize: 18,
