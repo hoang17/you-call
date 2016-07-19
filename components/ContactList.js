@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 
 import {
-  AppRegistry,
   StyleSheet,
   Text,
   TouchableHighlight,
@@ -17,12 +16,28 @@ module.exports = React.createClass({
     return (
       <ScrollView>
         {this.props.contacts.map((contact) => {
-          return (
-            <View style={{backgroundColor: 'rgba(0,0,0,.1)', margin: 5, padding:5,}}>
-              <Text>{contact.recordID} - {contact.firstName} - {contact.lastName}</Text>
-              <Text>{JSON.stringify(contact.emailAddresses)}</Text>
-            </View>
-          )
+          if (contact.phoneNumbers.length > 0 && contact.phoneNumbers.length <= 10) {
+            var fullName = '';
+            if (firstName = contact.firstName) {
+                fullName += firstName;
+            }
+            if (lastName = contact.lastName) {
+                if (fullName) {
+                    fullName += ' ';
+                }
+                fullName += lastName;
+            }
+            return (
+              <View style={{backgroundColor: 'rgba(0,0,0,.1)', margin: 5, padding:5,}}>
+                <Text>{fullName}</Text>
+                {contact.phoneNumbers.map((e) => {
+                  return (
+                    <Text>{e.label}: {e.number}</Text>
+                  )
+                })}
+              </View>
+            )
+          }
         })}
       </ScrollView>
     )
