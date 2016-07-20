@@ -280,7 +280,7 @@ class MainView extends Component{
         container.setState({status: 'calling', info: 'Calling ' + contact.fullName + '...'});
       }
       else{
-        container.setState({status: 'calling', info: contact.fullName + ' is offline, trying push notification'});
+        container.setState({status: 'calling', info: contact.fullName + ' is offline, trying push notification...'});
       }
     });
   }
