@@ -38,8 +38,8 @@
    */
 
 
-//   [[RCTBundleURLProvider sharedSettings] setDefaults];
-//   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+   [[RCTBundleURLProvider sharedSettings] setDefaults];
+   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
 
 
   /**
@@ -52,7 +52,7 @@
 
 
   
-  jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+//  jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
   
   [Fabric with:@[[Digits class]]];
 

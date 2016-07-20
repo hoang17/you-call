@@ -70,8 +70,8 @@ class MainView extends Component{
       contacts:[],
     };
 
-    socket = io.connect('youcall.herokuapp.com', {transports: ['websocket'], query: 'phone='+this.props.phone});
-    // socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket'], query: 'phone='+this.props.phone});
+    // socket = io.connect('youcall.herokuapp.com', {transports: ['websocket'], query: 'phone='+this.props.phone});
+    socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket'], query: 'phone='+this.props.phone});
 
     // @hoang load turn dynamically
     fetch("https://computeengineondemand.appspot.com/turn?username=iapprtc&key=4080218913", { method: "GET" })
@@ -86,8 +86,11 @@ class MainView extends Component{
     socket.on('exchange', function(data){
       container.exchange(data);
     });
-    socket.on('leave', function(socketId){
-      container.leave(socketId);
+    socket.on('hangup', function(socketId){
+      for (var socketId in pcPeers) {
+        container.leave(socketId);
+      }
+      container.setState({status: 'hangup', info: container.props.phone});
     });
     socket.on('connect', function() {
       console.log('connect', socket.id);
@@ -102,12 +105,13 @@ class MainView extends Component{
       container.setState({contacts: data.contacts});
     });
     socket.on('call', function(data) {
-      // alert(data.fromNumber + ' is calling...')
       console.log('call', data);
-      container.join(data.roomId);
-      console.log('contacts', container.state.contacts);
-      console.log('userId', data.from);
-      container.setState({status: 'connect', info: container.state.contacts[data.from].fullName + ' is calling...'});
+      container.createPC(data.socketId, true);
+      if (container.state.contacts[data.from]) {
+        container.setState({status: 'calling', info: container.state.contacts[data.from].fullName + ' is calling...'});
+      } else {
+        container.setState({status: 'calling', info: data.fromNumber + ' is calling...'});
+      }
     });
   }
 
@@ -124,16 +128,16 @@ class MainView extends Component{
     });
   }
 
-  join(roomId) {
-    socket.emit('join', roomId, function(socketIds){
-      console.log('join', socketIds);
-      for (const i in socketIds) {
-        const socketId = socketIds[i];
-        console.log('socketId', socketId)
-        container.createPC(socketId, true);
-      }
-    });
-  }
+  // join(roomId) {
+  //   socket.emit('join', roomId, function(socketIds){
+  //     console.log('join room ' + roomId, socketIds);
+  //     for (const i in socketIds) {
+  //       const socketId = socketIds[i];
+  //       console.log('socketId', socketId)
+  //       container.createPC(socketId, true);
+  //     }
+  //   });
+  // }
 
   createPC(socketId, isOffer) {
 
@@ -176,12 +180,12 @@ class MainView extends Component{
       // };
     }
     pc.onaddstream = function (event) {
-      console.log('onaddstream', event.stream);
-      container.setState({info: 'Peer joined'});
+      container.setState({status: 'calling', info: 'Peer joined'});
 
       const remoteList = container.state.remoteList;
       remoteList[socketId] = event.stream.toURL();
       container.setState({ remoteList: remoteList });
+      console.log('onaddstream', remoteList);
     };
     pc.onremovestream = function (event) {
       console.log('onremovestream', event.stream);
@@ -257,9 +261,8 @@ class MainView extends Component{
 
   leave(socketId) {
     console.log('leave', socketId);
-    const pc = pcPeers[socketId];
-    if (!pc) return;
-    pc.close();
+    if (!pcPeers[socketId]) return;
+    pcPeers[socketId].close();
     delete pcPeers[socketId];
 
     const remoteList = container.state.remoteList;
@@ -285,12 +288,17 @@ class MainView extends Component{
   }
 
   _call(contact){
-    // alert('Calling ' + contact.fullName);
-    var to = contact.userId;
-    var roomId = user._id;
-    socket.emit('call', {'to': to, 'roomId': roomId  });
-    container.join(roomId);
-    container.setState({status: 'connect', info: 'Calling ' + contact.fullName + '...'});
+    console.log('call user', contact.userId)
+    socket.emit('call', contact.userId, function(socketId){
+      if (socketId){
+        console.log('call socket', socketId)
+        container.createPC(socketId, true);
+        container.setState({status: 'calling', info: 'Calling ' + contact.fullName + '...'});
+      }
+      else{
+        container.setState({status: 'calling', info: contact.fullName + ' is offline, trying push notification'});
+      }
+    });
   }
 
   _hangup(){
@@ -298,6 +306,7 @@ class MainView extends Component{
       container.leave(socketId);
     }
     socket.emit('hangup');
+    container.setState({status: 'hangup', info: container.props.phone});
   }
 
   render() {
@@ -317,7 +326,7 @@ class MainView extends Component{
                 >
               <Text style={styles.buttonText}>Sync contacts</Text>
             </TouchableHighlight>
-            { this.state.status == 'connected' ?
+            { this.state.status == 'calling' || this.state.status == 'connected' ?
             <TouchableHighlight style={styles.button}
                 underlayColor='#99d9f4'
                 onPress={this._hangup}
@@ -380,17 +389,6 @@ const styles = StyleSheet.create({
 	  alignSelf: 'stretch',
 	  justifyContent: 'center'
 	},
-	roomInput: {
-	  height: 36,
-	  padding: 4,
-	  marginRight: 5,
-	  flex: 5,
-	  fontSize: 18,
-	  borderWidth: 1,
-	  borderColor: '#48BBEC',
-	  borderRadius: 4,
-	  color: '#48BBEC'
-	}
 });
 
 module.exports = MainView
