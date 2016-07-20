@@ -29,7 +29,7 @@ var YouCall = React.createClass({
   render: function() {
       return (
           <NavigatorIOS
-            //navigationBarHidden={true}
+            navigationBarHidden={true}
             style={styles.navigationContainer}
             initialRoute={{ title: "Login", component: LoginView }}
           />
