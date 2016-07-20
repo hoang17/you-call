@@ -90,7 +90,7 @@ class MainView extends Component{
       for (var socketId in pcPeers) {
         container.leave(socketId);
       }
-      container.setState({status: 'hangup', info: container.props.phone});
+      container.setState({status: 'ready', info: container.props.phone});
     });
     socket.on('connect', function() {
       console.log('connect', socket.id);
@@ -249,7 +249,7 @@ class MainView extends Component{
     pcPeers[socketId].close();
     delete pcPeers[socketId];
 
-    container.setState({status: 'hangup', info: container.props.phone});
+    container.setState({status: 'ready', info: container.props.phone});
   }
 
   _syncContacts(){
@@ -269,6 +269,9 @@ class MainView extends Component{
   }
 
   _call(contact){
+    if (container.state.status != 'ready'){
+      return;
+    }
     console.log('call user', contact.userId)
     socket.emit('call', contact.userId, function(socketId){
       if (socketId){
@@ -288,7 +291,7 @@ class MainView extends Component{
       container.leave(socketId);
     }
     socket.emit('hangup');
-    container.setState({status: 'hangup', info: container.props.phone});
+    container.setState({status: 'ready', info: container.props.phone});
   }
 
   render() {
