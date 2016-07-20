@@ -55,9 +55,9 @@ const configuration = {iceServers: [
   },
 ]};
 
-var pendingNotifications = []; // if we're pending for an object to get initialized.
+var pendingNotifications = [];
 
-function handleNotification (notification) { // If you want to handle the notifiaction with a payload.
+function handleNotification (notification) {
 
     console.log('handle notification', notification);
 
@@ -70,28 +70,23 @@ function handleNotification (notification) { // If you want to handle the notifi
     // });
 }
 
-OneSignal.configure({
-    onIdsAvailable: function(device) {
-      console.log(device);
-      console.log('UserId = ', device.userId);
-      console.log('PushToken = ', device.pushToken);
-    },
-    onNotificationOpened: function(message, data, isActive) {
+// Check permissions
+// OneSignal.checkPermissions((permissions) => {
+//     console.log(permissions);
+// });
 
-      var notification = {message: message, data: data, isActive: isActive};
-      console.log('NOTIFICATION OPENED: ', notification);
+// Setting requestPermissions
+// permissions = {
+//     alert: true,
+//     badge: true,
+//     sound: true
+// };
+// OneSignal.requestPermissions(permissions);
 
-      //if (!_navigator) { // If we want to wait for an object to get initialized
-      //    console.log('Navigator is null, adding notification to pending list...');
-          // pendingNotifications.push(notification);
-      //    return;
-      // }
-
-      pendingNotifications.push(notification);
-      handleNotification(notification);
-    },
-});
-
+// Calling registerForPushNotifications
+// Call when you want to prompt the user to accept push notifications.
+// Only call once and only if you passed false to *initWithLaunchOptions autoRegister*:.
+// OneSignal.registerForPushNotifications();
 
 class MainView extends Component{
 
@@ -99,8 +94,6 @@ class MainView extends Component{
     super(props);
 
     container = this;
-
-    this.ds = new ListView.DataSource({rowHasChanged: (r1, r2) => true});
 
     this.state = {
       info: 'Initializing',
@@ -139,9 +132,53 @@ class MainView extends Component{
       });
     });
     socket.on('user', function(data) {
+
       console.log('user', data.user);
+
       user = data.user;
+
       container.setState({contacts: data.contacts});
+
+      OneSignal.configure({
+          onIdsAvailable: function(device) {
+            device.id = user._id;
+            console.log(device);
+            // console.log('UserId = ', device.userId);
+            // console.log('PushToken = ', device.pushToken);
+            socket.emit('device', device);
+          },
+          onNotificationOpened: function(message, data, isActive) {
+
+            console.log('notification', data);
+
+            if (container.state.status != 'ready'){
+              alert(message);
+              return;
+            }
+
+            console.log('call socket', data.socketId)
+            container.createPC(data.socketId, true);
+            container.setState({status: 'calling', info: message});
+
+            // Calling postNotification
+            // OneSignal.postNotification(contents, data, player_id);
+
+            // if (data.p2p_notification) {
+            //     console.log(data.p2p_notification);
+            // }
+
+            // var notification = {message: message, data: data, isActive: isActive};
+            // console.log('NOTIFICATION OPENED: ', notification);
+
+            //if (!_navigator) { // If we want to wait for an object to get initialized
+            //    console.log('Navigator is null, adding notification to pending list...');
+                // pendingNotifications.push(notification);
+            //    return;
+            // }
+            // handleNotification(notification);
+          },
+      });
+
     });
     socket.on('call', function(data) {
       console.log('call', data);
@@ -312,13 +349,14 @@ class MainView extends Component{
       return;
     }
     console.log('call user', contact.userId)
-    socket.emit('call', contact.userId, function(socketId){
-      if (socketId){
-        console.log('call socket', socketId)
-        container.createPC(socketId, true);
+    socket.emit('call', contact.userId, function(user){
+      if (user.socketId){
+        console.log('call socket', user.socketId)
+        container.createPC(user.socketId, true);
         container.setState({status: 'calling', info: 'Calling ' + contact.fullName + '...'});
-      }
-      else{
+      } else {
+        // Calling postNotification
+        // OneSignal.postNotification(contents, data, player_id);
         container.setState({status: 'calling', info: contact.fullName + ' is offline, trying push notification...'});
       }
     });
