@@ -156,16 +156,11 @@ class MainView extends Component{
               return;
             }
 
-            console.log('call socket', data.socketId)
-            container.createPC(data.socketId, true);
+            var socketId = data.p2p_notification ? data.p2p_notification.socketId : data.socketId;
+
+            console.log('call socket', socketId)
+            container.createPC(socketId, true);
             container.setState({status: 'calling', info: message});
-
-            // Calling postNotification
-            // OneSignal.postNotification(contents, data, player_id);
-
-            // if (data.p2p_notification) {
-            //     console.log(data.p2p_notification);
-            // }
 
             // var notification = {message: message, data: data, isActive: isActive};
             // console.log('NOTIFICATION OPENED: ', notification);
@@ -355,8 +350,10 @@ class MainView extends Component{
         container.createPC(user.socketId, true);
         container.setState({status: 'calling', info: 'Calling ' + contact.fullName + '...'});
       } else {
-        // Calling postNotification
-        // OneSignal.postNotification(contents, data, player_id);
+        // direct push notification
+        var contents = {"en": container.props.phone + ' is callling DIRECTLY...' };
+        var data = { from: user.id, socketId: socket.id };
+        OneSignal.postNotification(contents, data, user.device);
         container.setState({status: 'calling', info: contact.fullName + ' is offline, trying push notification...'});
       }
     });
