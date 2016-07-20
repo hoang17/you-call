@@ -70,7 +70,7 @@ class MainView extends Component{
       contacts:[],
     };
 
-    socket = io.connect('youcall.herokuapp.com', {transports: ['websocket'], query: 'phone='+this.props.phoe});
+    socket = io.connect('youcall.herokuapp.com', {transports: ['websocket'], query: 'phone='+this.props.phone});
     // socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket'], query: 'phone='+this.props.phone});
 
     // @hoang load turn dynamically
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
 	},
   contacts: {
     alignSelf: 'stretch',
-    height:400,
+    height:300,
     borderWidth:1,
     borderColor: '#48BBEC',
     borderRadius: 4,

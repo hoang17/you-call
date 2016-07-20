@@ -26,6 +26,7 @@ class LoginView extends Component{
 
     AsyncStorage.getItem("phone").then((phone) => {
       if (phone){
+        console.log('AsyncStorage phone', phone);
         this.props.navigator.push({
           title: "Main",
           component: MainView,
@@ -47,10 +48,13 @@ class LoginView extends Component{
   onLogin(error, response) {
     if (error && error.code !== 1) {
       this.setState({ logged: false, error: true, response: {} });
+      console.log('onLogin', error);
     }
     else if (response) {
       var logged = JSON.stringify(response) === '{}' ? false : true;
       this.setState({ logged: logged, error: false, response: response });
+
+      console.log('onLogin response', response);
 
       fetch('https://api.digits.com/1.1/sdk/account.json', {
         method: 'GET',
@@ -67,14 +71,14 @@ class LoginView extends Component{
 
         var phone = responseJson.phone_number;
 
-        if (phone){
+        if (phone && phone != 'undefined'){
           AsyncStorage.setItem('phone', phone);
 
           this.props.navigator.push({
             title: "Main",
             component: MainView,
             passProps: {phone: phone},
-          });  
+          });
         }
 
       })
@@ -91,7 +95,9 @@ class LoginView extends Component{
     else if (response) {
       var logged = JSON.stringify(response) === '{}' ? false : true;
       this.setState({ logged: logged, error: false, response: response });
-      AsyncStorage.setItem("phone", null);
+      AsyncStorage.removeItem("phone", function(err){
+        if (err) console.log(err);
+      });
     }
   }
 
