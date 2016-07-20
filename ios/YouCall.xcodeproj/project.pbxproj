@@ -341,10 +341,10 @@
 			children = (
 				3747666D1D40064D009F6E53 /* main.m */,
 				3747666A1D40064D009F6E53 /* Info.plist */,
-				374766691D40064D009F6E53 /* AppDelegate.m */,
 				3747666B1D40064D009F6E53 /* AppDelegate.h */,
-				374766841D4006C4009F6E53 /* LaunchScreen.xib */,
+				374766691D40064D009F6E53 /* AppDelegate.m */,
 				3747666C1D40064D009F6E53 /* Images.xcassets */,
+				374766841D4006C4009F6E53 /* LaunchScreen.xib */,
 			);
 			name = YouCall;
 			sourceTree = "<group>";

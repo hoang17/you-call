@@ -17,6 +17,7 @@
 #import "RCTOneSignal.h"
 
 @implementation AppDelegate
+@synthesize oneSignal = _oneSignal;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -56,6 +57,10 @@
 //  jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
   
   [Fabric with:@[[Digits class]]];
+  
+  
+  self.oneSignal = [[RCTOneSignal alloc] initWithLaunchOptions:launchOptions
+                                                         appId:@"b5d06e8d-6260-4c9b-84b3-b64a6895124b"];
 
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
@@ -70,6 +75,10 @@
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
   return YES;
+}
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)notification {
+  [RCTOneSignal didReceiveRemoteNotification:notification];
 }
 
 @end
