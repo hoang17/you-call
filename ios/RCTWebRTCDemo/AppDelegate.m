@@ -14,6 +14,7 @@
 #import "RCTRootView.h"
 #import <Fabric/Fabric.h>
 #import <DigitsKit/DigitsKit.h>
+#import "RCTOneSignal.h"
 
 @implementation AppDelegate
 

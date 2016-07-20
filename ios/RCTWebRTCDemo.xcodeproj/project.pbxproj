@@ -28,6 +28,7 @@
 		372C189C1D3BE599000A5510 /* DigitsKitResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 372C18981D3BE599000A5510 /* DigitsKitResources.bundle */; };
 		372C189D1D3BE599000A5510 /* TwitterCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 372C18991D3BE599000A5510 /* TwitterCore.framework */; };
 		372C18A41D3BE6BF000A5510 /* libRCTDigitsManager.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 372C18A31D3BE65C000A5510 /* libRCTDigitsManager.a */; };
+		3747663A1D3FFD6B009F6E53 /* libRCTOneSignal.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 374766331D3FFD53009F6E53 /* libRCTOneSignal.a */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		BE003A29903C4D6494E8B0D6 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 79A7DD80845D462E93C6F3D1 /* libz.tbd */; };
 		BF772BB81D2E500700C3B0A8 /* libjingle_peerconnection_revision_build.txt in Resources */ = {isa = PBXBuildFile; fileRef = BF772BB31D2E500700C3B0A8 /* libjingle_peerconnection_revision_build.txt */; };
@@ -131,6 +132,13 @@
 			remoteGlobalIDString = 4D8BECAE1BDFF0FB000A1462;
 			remoteInfo = RCTDigitsManager;
 		};
+		374766321D3FFD53009F6E53 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 374766251D3FFD52009F6E53 /* RCTOneSignal.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3245CDED1BFEE35C00EABF68;
+			remoteInfo = RCTOneSignal;
+		};
 		376C5FDC1D345513004B2143 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = B9D681609C4B4AC9BFF5CCBD /* CodePush.xcodeproj */;
@@ -187,6 +195,7 @@
 		372C18981D3BE599000A5510 /* DigitsKitResources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = DigitsKitResources.bundle; path = DigitsKit.framework/Versions/A/Resources/DigitsKitResources.bundle; sourceTree = "<group>"; };
 		372C18991D3BE599000A5510 /* TwitterCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = TwitterCore.framework; sourceTree = "<group>"; };
 		372C189E1D3BE65C000A5510 /* RCTDigitsManager.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTDigitsManager.xcodeproj; path = "../node_modules/react-native-fabric-digits/ios/RCTDigitsManager.xcodeproj"; sourceTree = "<group>"; };
+		374766251D3FFD52009F6E53 /* RCTOneSignal.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTOneSignal.xcodeproj; path = "../node_modules/react-native-onesignal/ios/RCTOneSignal.xcodeproj"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		79A7DD80845D462E93C6F3D1 /* libz.tbd */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		7BC9D94F52D44A478C8BFE3E /* libCodePush.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libCodePush.a; sourceTree = "<group>"; };
@@ -250,6 +259,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3747663A1D3FFD6B009F6E53 /* libRCTOneSignal.a in Frameworks */,
 				370C81481D3E04DE00269221 /* libRCTAddressBook.a in Frameworks */,
 				372C18A41D3BE6BF000A5510 /* libRCTDigitsManager.a in Frameworks */,
 				BF772BDB1D2E508500C3B0A8 /* libstdc++.tbd in Frameworks */,
@@ -397,6 +407,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		374766261D3FFD52009F6E53 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				374766331D3FFD53009F6E53 /* libRCTOneSignal.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		376C5FD91D345513004B2143 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -416,6 +434,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				374766251D3FFD52009F6E53 /* RCTOneSignal.xcodeproj */,
 				370C81321D3E04A800269221 /* RCTAddressBook.xcodeproj */,
 				372C189E1D3BE65C000A5510 /* RCTDigitsManager.xcodeproj */,
 				372C18961D3BE599000A5510 /* Fabric.framework */,
@@ -651,6 +670,10 @@
 					ProjectRef = 00C302D31ABCB9D200DB3ED1 /* RCTNetwork.xcodeproj */;
 				},
 				{
+					ProductGroup = 374766261D3FFD52009F6E53 /* Products */;
+					ProjectRef = 374766251D3FFD52009F6E53 /* RCTOneSignal.xcodeproj */;
+				},
+				{
 					ProductGroup = 139105B71AF99BAD00B5F7CC /* Products */;
 					ProjectRef = 139105B61AF99BAD00B5F7CC /* RCTSettings.xcodeproj */;
 				},
@@ -759,6 +782,13 @@
 			fileType = archive.ar;
 			path = libRCTDigitsManager.a;
 			remoteRef = 372C18A21D3BE65C000A5510 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		374766331D3FFD53009F6E53 /* libRCTOneSignal.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRCTOneSignal.a;
+			remoteRef = 374766321D3FFD53009F6E53 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		376C5FDD1D345513004B2143 /* libCodePush.a */ = {
@@ -1016,6 +1046,7 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../node_modules/react-native/React/**",
 					"$(SRCROOT)/../node_modules/react-native-code-push/ios/CodePush/**",
+					"$(SRCROOT)/../node_modules/react-native-onesignal/**",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -1057,6 +1088,7 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../node_modules/react-native/React/**",
 					"$(SRCROOT)/../node_modules/react-native-code-push/ios/CodePush/**",
+					"$(SRCROOT)/../node_modules/react-native-onesignal/**",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;

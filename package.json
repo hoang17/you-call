@@ -12,6 +12,7 @@
     "react-native-addressbook": "^1.3.0",
     "react-native-code-push": "^1.13.2-beta",
     "react-native-fabric-digits": "github:jeanlebrument/react-native-fabric-digits",
+    "react-native-onesignal": "^1.2.0",
     "react-native-webrtc": "^0.8.0",
     "socket.io-client": "^1.3.7"
   }
