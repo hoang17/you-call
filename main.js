@@ -66,7 +66,6 @@ class MainView extends Component{
     this.state = {
       info: 'Initializing',
       status: 'init',
-      remoteList: {},
       contacts:[],
     };
 
@@ -86,7 +85,8 @@ class MainView extends Component{
     socket.on('exchange', function(data){
       container.exchange(data);
     });
-    socket.on('hangup', function(socketId){
+    socket.on('hangup', function(from){
+      console.log('hangup', from);
       for (var socketId in pcPeers) {
         container.leave(socketId);
       }
@@ -106,7 +106,6 @@ class MainView extends Component{
     });
     socket.on('call', function(data) {
       console.log('call', data);
-      // container.createPC(data.socketId, true);
       if (container.state.contacts[data.from]) {
         container.setState({status: 'calling', info: container.state.contacts[data.from].fullName + ' is calling...'});
       } else {
@@ -127,17 +126,6 @@ class MainView extends Component{
       }, logError);
     });
   }
-
-  // join(roomId) {
-  //   socket.emit('join', roomId, function(socketIds){
-  //     console.log('join room ' + roomId, socketIds);
-  //     for (const i in socketIds) {
-  //       const socketId = socketIds[i];
-  //       console.log('socketId', socketId)
-  //       container.createPC(socketId, true);
-  //     }
-  //   });
-  // }
 
   createPC(socketId, isOffer) {
 
@@ -180,15 +168,10 @@ class MainView extends Component{
       // };
     }
     pc.onaddstream = function (event) {
-      container.setState({status: 'calling', info: 'Peer joined'});
-
-      const remoteList = container.state.remoteList;
-      remoteList[socketId] = event.stream.toURL();
-      container.setState({ remoteList: remoteList });
-      console.log('onaddstream', remoteList);
+      console.log('onaddstream');
     };
     pc.onremovestream = function (event) {
-      console.log('onremovestream', event.stream);
+      console.log('onremovestream');
     };
     pc.addStream(localStream);
 
@@ -219,6 +202,7 @@ class MainView extends Component{
     //
     //   pc.textDataChannel = dataChannel;
     // }
+
     function createOffer() {
       pc.createOffer(function(desc) {
         console.log('createOffer', desc);
@@ -265,9 +249,6 @@ class MainView extends Component{
     pcPeers[socketId].close();
     delete pcPeers[socketId];
 
-    const remoteList = container.state.remoteList;
-    delete remoteList[socketId]
-    container.setState({ remoteList: remoteList });
     container.setState({status: 'hangup', info: container.props.phone});
   }
 
@@ -302,6 +283,7 @@ class MainView extends Component{
   }
 
   _hangup(){
+    console.log('_hangup');
     for (var socketId in pcPeers) {
       container.leave(socketId);
     }
