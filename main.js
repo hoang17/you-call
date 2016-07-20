@@ -106,7 +106,7 @@ class MainView extends Component{
     });
     socket.on('call', function(data) {
       console.log('call', data);
-      container.createPC(data.socketId, true);
+      // container.createPC(data.socketId, true);
       if (container.state.contacts[data.from]) {
         container.setState({status: 'calling', info: container.state.contacts[data.from].fullName + ' is calling...'});
       } else {
