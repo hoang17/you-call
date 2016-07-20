@@ -183,6 +183,11 @@ class MainView extends Component{
         container.setState({status: 'calling', info: data.fromNumber + ' is calling...'});
       }
     });
+    socket.on('disconnected', function(device) {
+      console.log('peer disconnected');
+      container._push(device)
+      container.setState({status: 'calling', info: 'trying push notification...'});
+    });
   }
 
   getLocalStream(callback) {
@@ -344,19 +349,23 @@ class MainView extends Component{
       return;
     }
     console.log('call user', contact.userId)
-    socket.emit('call', contact.userId, function(user){
-      if (user.socketId){
-        console.log('call socket', user.socketId)
-        container.createPC(user.socketId, true);
+    socket.emit('call', contact.userId, function(res){
+      if (res.socketId){
+        console.log('call socket', res.socketId)
+        container.createPC(res.socketId, true);
         container.setState({status: 'calling', info: 'Calling ' + contact.fullName + '...'});
       } else {
         // direct push notification
-        var contents = {"en": container.props.phone + ' is callling DIRECTLY...' };
-        var data = { from: user.id, socketId: socket.id };
-        OneSignal.postNotification(contents, data, user.device);
+        _push(res.device);
         container.setState({status: 'calling', info: contact.fullName + ' is offline, trying push notification...'});
       }
     });
+  }
+
+  _push(device){
+    var contents = {en: container.props.phone + ' is callling...' };
+    var data = { from: user.id, socketId: socket.id };
+    OneSignal.postNotification(contents, data, device);
   }
 
   _hangup(){
