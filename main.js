@@ -124,8 +124,8 @@ class MainView extends Component{
     });
   }
 
-  join(roomID) {
-    socket.emit('join', roomID, function(socketIds){
+  join(roomId) {
+    socket.emit('join', roomId, function(socketIds){
       console.log('join', socketIds);
       for (const i in socketIds) {
         const socketId = socketIds[i];

@@ -6,7 +6,6 @@ if (!window.navigator.userAgent) {
 
 // @hoang add RCTLog because error with CodePush
 var RCTLog = require('RCTLog');
-// require('./contacts');
 
 import codePush from "react-native-code-push";
 import React, { Component } from 'react';
