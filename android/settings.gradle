@@ -1,4 +1,4 @@
-rootProject.name = 'RCTWebRTCDemo'
+rootProject.name = 'YouCall'
 
 include ':app'
 include ':react-native-code-push'

@@ -1,4 +1,4 @@
-package com.rctwebrtcdemo;
+package com.ping.youcall;
 
 import com.facebook.react.ReactActivity;
 import com.microsoft.codepush.react.CodePush;
@@ -11,6 +11,6 @@ public class MainActivity extends ReactActivity {
      */
     @Override
     protected String getMainComponentName() {
-        return "RCTWebRTCDemo";
+        return "YouCall";
     }
 }
