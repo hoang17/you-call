@@ -21,6 +21,7 @@ import {
   MediaStreamTrack,
   getUserMedia,
 } from 'react-native-webrtc';
+import OneSignal from 'react-native-onesignal';
 
 var ContactList = require('./components/ContactList')
 import AddressBook from 'react-native-addressbook'
@@ -53,6 +54,47 @@ const configuration = {iceServers: [
     username: 'lehuyhoang117@gmail.com'
   },
 ]};
+
+var pendingNotifications = []; // if we're pending for an object to get initialized.
+
+function handleNotification (notification) { // If you want to handle the notifiaction with a payload.
+
+    console.log('handle notification', notification);
+
+    // _navigator.to('main.post', notification.data.title, {
+    //  article: {
+    //    title: notification.data.title,
+    //    link: notification.data.url,
+    //    action: notification.data.actionSelected
+    //  }
+    // });
+}
+
+OneSignal.configure({
+    onIdsAvailable: function(device) {
+      console.log(device);
+      console.log('UserId = ', device.userId);
+      console.log('PushToken = ', device.pushToken);
+    },
+    onNotificationOpened: function(message, data, isActive) {
+      console.log('MESSAGE: ', message);
+      console.log('DATA: ', data);
+      console.log('ISACTIVE: ', isActive);
+
+      var notification = {message: message, data: data, isActive: isActive};
+      console.log('NOTIFICATION OPENED: ', notification);
+
+      //if (!_navigator) { // If we want to wait for an object to get initialized
+      //    console.log('Navigator is null, adding notification to pending list...');
+          // pendingNotifications.push(notification);
+      //    return;
+      // }
+
+      pendingNotifications.push(notification);
+      handleNotification(notification);
+    },
+});
+
 
 class MainView extends Component{
 
