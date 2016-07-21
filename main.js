@@ -31,6 +31,7 @@ let localStream;
 var container;
 var socket;
 var user;
+var callTo;
 const configuration = {iceServers: [
   {url:'stun:stun.l.google.com:19302'},
   {url:'stun:stun1.l.google.com:19302'},
@@ -186,7 +187,7 @@ class MainView extends Component{
     socket.on('disconnected', function(device) {
       console.log('peer disconnected');
       container._push(device)
-      container.setState({status: 'calling', info: 'trying push notification...'});
+      container.setState({status: 'calling', info: '*Calling ' + callTo.fullName + '...'});
     });
   }
 
@@ -348,16 +349,18 @@ class MainView extends Component{
     if (container.state.status != 'ready'){
       return;
     }
-    console.log('call user', contact.userId)
-    socket.emit('call', contact.userId, function(res){
+    callTo = contact;
+    console.log('call user', callTo.userId)
+    socket.emit('call', callTo.userId, function(res){
       if (res.socketId){
         console.log('call socket', res.socketId)
         container.createPC(res.socketId, true);
-        container.setState({status: 'calling', info: 'Calling ' + contact.fullName + '...'});
+        container.setState({status: 'calling', info: 'Calling ' + callTo.fullName + '...'});
       } else {
         // direct push notification
         container._push(res.device);
-        container.setState({status: 'calling', info: contact.fullName + ' is offline, trying push notification...'});
+        container.setState({status: 'calling', info: '*Calling ' + callTo.fullName + '...'});
+        // container.setState({status: 'calling', info: callTo.fullName + ' is offline, trying push notification...'});
       }
     });
   }
