@@ -55,7 +55,15 @@ const configuration = {iceServers: [
   },
 ]};
 
-var pendingNotification;
+var noti;
+var pendingnoti = {
+  roomId: null,
+  message: null,
+  callback: function(){
+    noti = { message: pendingnoti.message, roomId: pendingnoti.roomId };
+  },
+};
+
 
 // Check permissions
 // OneSignal.checkPermissions((permissions) => {
@@ -118,14 +126,21 @@ class MainView extends Component{
 
     socket.on('connect', function() {
       console.log('connect', socket.id);
+      var ready = noti ? false : true;
       container.getLocalStream(function(stream) {
         localStream = stream;
-        container.setState({status: 'ready', info: container.props.phone});
+        if (ready) container.setState({status: 'ready', info: container.props.phone});
       });
-      if (pendingNotification){
-        handleNotification(pendingNotification.message, pendingNotification.data);
-        pendingNotification = null;
+      // handling pending push notification
+      if (noti){
+        container.join(noti.roomId);
+        container.setState({status: 'calling', info: noti.message});
+        noti = null;
       }
+    });
+
+    socket.on('error', function(err) {
+      pendingnoti.callback()
     });
 
     socket.on('user', function(user) {
@@ -138,32 +153,24 @@ class MainView extends Component{
           onIdsAvailable: function(device) {
             device.id = user._id;
             console.log('device', device.userId);
-            // console.log('UserId = ', device.userId);
-            // console.log('PushToken = ', device.pushToken);
             socket.emit('device', device);
           },
           onNotificationOpened: function(message, data, isActive) {
-
             if (isActive || container.state.status != 'ready'){
               return
             }
 
+            pendingnoti.roomId = data.p2p_notification ? data.p2p_notification.roomId : data.roomId;
+            pendingnoti.message = message;
+
             if (socket.connected){
-              handleNotification(message, data)
-            }else{
-              pendingNotification = {message: message, data: data};
-            }
+              container.join(pendingnoti.roomId);
+              container.setState({status: 'calling', info: message});
+}
           },
       });
 
     });
-
-    function handleNotification (message, data) {
-      var roomId = data.p2p_notification ? data.p2p_notification.roomId : data.roomId;
-      container.join(roomId)
-      container.setState({status: 'calling', info: message});
-    }
-
 
     socket.on('call', function(data) {
       console.log('call', data);
@@ -363,26 +370,6 @@ class MainView extends Component{
     var s2 = p2.substr(p2.length-4);
     return s1 < s2 ? s1 + '-' + s2 : s2 + '-' + s1;
   }
-
-  // _call(contact){
-  //   if (container.state.status != 'ready'){
-  //     return;
-  //   }
-  //   callTo = contact;
-  //   console.log('call user', callTo.userId)
-  //   socket.emit('call', callTo.userId, function(res){
-  //     if (res.socketId){
-  //       console.log('call socket', res.socketId)
-  //       container.createPC(res.socketId, true);
-  //       container.setState({status: 'calling', info: 'Calling ' + callTo.fullName + '...'});
-  //     } else if (res.device) {
-  //       // direct push notification
-  //       container._push(res.device);
-  //       container.setState({status: 'calling', info: '*Calling ' + callTo.fullName + '...'});
-  //       // container.setState({status: 'calling', info: callTo.fullName + ' is offline, trying push notification...'});
-  //     }
-  //   });
-  // }
 
   _push(to){
     var contents = {en: to.fullName + ' is callling...' };
