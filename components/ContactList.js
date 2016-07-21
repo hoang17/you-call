@@ -11,7 +11,7 @@ import {
 module.exports = React.createClass({
 
   render(){
-    var keys = Object.keys(this.props.contacts);
+    var keys = this.props.contacts ? Object.keys(this.props.contacts) : [];
     if(keys.length == 0){
       return <Text>No Contacts Loaded</Text>
     }
@@ -22,17 +22,7 @@ module.exports = React.createClass({
           if (contact.phoneNumbers.length == 0 || contact.phoneNumbers.length > 10) {
             return
           }
-          var fullName = '';
-          if (firstName = contact.firstName) {
-              fullName += firstName;
-          }
-          if (lastName = contact.lastName) {
-              if (fullName) {
-                  fullName += ' ';
-              }
-              fullName += lastName;
-          }
-          contact.fullName = fullName;
+          contact.fullName = [contact.firstName, contact.lastName].join(' ');
           return (
             <View style={{padding:5}} key={contact.recordID}>
               <TouchableHighlight
@@ -40,7 +30,7 @@ module.exports = React.createClass({
                 underlayColor='#99d9f4'
                 onPress={this.props.callback.bind(this, contact)}
                 >
-                <Text style={styles.buttonText}>{fullName}</Text>
+                <Text style={styles.buttonText}>{contact.fullName} ({contact.phone.substr(contact.phone.length-4)})</Text>
                 {/*{contact.phoneNumbers.map((e) => {
                   return (
                       <Text key={e.number} style={styles.buttonText}>{e.label}: {e.number}</Text>

@@ -30,7 +30,6 @@ const pcPeers = {};
 let localStream;
 var container;
 var socket;
-var user;
 var callTo;
 const configuration = {iceServers: [
   {url:'stun:stun.l.google.com:19302'},
@@ -100,10 +99,11 @@ class MainView extends Component{
       info: 'Initializing',
       status: 'init',
       contacts:[],
+      user:null,
     };
 
-    socket = io.connect('youcall.herokuapp.com', {transports: ['websocket'], query: 'phone='+this.props.phone});
-    // socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket'], query: 'phone='+this.props.phone});
+    // socket = io.connect('youcall.herokuapp.com', {transports: ['websocket'], query: 'phone='+this.props.phone});
+    socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket'], query: 'phone='+this.props.phone});
 
     // @hoang load turn dynamically
     fetch("https://computeengineondemand.appspot.com/turn?username=iapprtc&key=4080218913", { method: "GET" })
@@ -117,6 +117,9 @@ class MainView extends Component{
 
     socket.on('exchange', function(data){
       container.exchange(data);
+    });
+    socket.on('leave', function(socketId){
+      container.leave(socketId);
     });
     socket.on('hangup', function(from){
       console.log('hangup', from);
@@ -132,13 +135,11 @@ class MainView extends Component{
         container.setState({status: 'ready', info: container.props.phone});
       });
     });
-    socket.on('user', function(data) {
+    socket.on('user', function(user) {
+      console.log('user', user.phone);
 
-      console.log('user', data.user);
-
-      user = data.user;
-
-      container.setState({contacts: data.contacts});
+      container.setState({user: user});
+      container.setState({contacts: user.contacts});
 
       OneSignal.configure({
           onIdsAvailable: function(device) {
@@ -153,14 +154,14 @@ class MainView extends Component{
             console.log('notification', data);
 
             if (container.state.status != 'ready'){
-              alert(message);
               return;
             }
 
-            var socketId = data.p2p_notification ? data.p2p_notification.socketId : data.socketId;
+            var roomId = data.p2p_notification ? data.p2p_notification.roomId : data.roomId;
 
-            console.log('call socket', socketId)
-            container.createPC(socketId, true);
+            // console.log('call socket', socketId);
+            // container.createPC(socketId, true);
+            container.join(roomId)
             container.setState({status: 'calling', info: message});
 
             // var notification = {message: message, data: data, isActive: isActive};
@@ -176,18 +177,25 @@ class MainView extends Component{
       });
 
     });
+
     socket.on('call', function(data) {
       console.log('call', data);
-      if (container.state.contacts[data.from]) {
-        container.setState({status: 'calling', info: container.state.contacts[data.from].fullName + ' is calling...'});
-      } else {
-        container.setState({status: 'calling', info: data.fromNumber + ' is calling...'});
+      if (container.state.status != 'ready'){
+        return;
       }
+      container.join(data.roomId);
+      var from = container.state.contacts[data.from];
+      var name = from ? from.fullName : data.fromNumber;
+      container.setState({status: 'calling', info: name + ' is calling...'});
     });
+
     socket.on('disconnected', function(device) {
       console.log('peer disconnected');
-      container._push(device)
-      container.setState({status: 'calling', info: '*Calling ' + callTo.fullName + '...'});
+      // if one peer disconnected send push notification to reconnect
+      // if (callTo){
+      //   container._push(device)
+      //   container.setState({status: 'calling', info: '*Calling ' + callTo.fullName + '...'});
+      // }
     });
   }
 
@@ -201,6 +209,17 @@ class MainView extends Component{
         console.log('stream', stream);
         callback(stream);
       }, logError);
+    });
+  }
+
+  join(roomId) {
+    socket.emit('join', roomId, function(socketIds){
+      console.log('join', socketIds);
+      for (const i in socketIds) {
+        const socketId = socketIds[i];
+        console.log('socketId', socketId)
+        container.createPC(socketId, true);
+      }
     });
   }
 
@@ -225,7 +244,8 @@ class MainView extends Component{
       console.log('*** oniceconnectionstatechange ***', event.target.iceConnectionState);
 
       if (event.target.iceConnectionState === 'disconnected') {
-        container._hangup()
+        container.setState({status: 'ready', info: 'Peer disconnected'});
+        // container._hangup();
       }
 
       if (event.target.iceConnectionState === 'connected') {
@@ -332,7 +352,7 @@ class MainView extends Component{
   _syncContacts(){
     AddressBook.getContacts( (err, contacts) => {
       if(err && err.type === 'permissionDenied'){
-        // x.x
+        alert('Can not sync contacts because permisson not granted');
       }
       else{
         container.setState({status: 'ready', info:'begin syncing ' + contacts.length +' contacts...'});
@@ -349,26 +369,41 @@ class MainView extends Component{
     if (container.state.status != 'ready'){
       return;
     }
+    var user = container.state.user;
+    var roomId = user.phone.substr(user.phone.length-4);
+    container.join(roomId);
     callTo = contact;
-    console.log('call user', callTo.userId)
-    socket.emit('call', callTo.userId, function(res){
-      if (res.socketId){
-        console.log('call socket', res.socketId)
-        container.createPC(res.socketId, true);
-        container.setState({status: 'calling', info: 'Calling ' + callTo.fullName + '...'});
-      } else {
-        // direct push notification
-        container._push(res.device);
-        container.setState({status: 'calling', info: '*Calling ' + callTo.fullName + '...'});
-        // container.setState({status: 'calling', info: callTo.fullName + ' is offline, trying push notification...'});
-      }
+    socket.emit('call', {to: callTo.userId, roomId: roomId, phone: callTo.phone}, function(data){
+      data.roomId = roomId;
+      container._push(data);
     });
+    container.setState({status: 'calling', info: 'Calling ' + callTo.fullName + '...'});
   }
 
-  _push(device){
-    var contents = {en: container.props.phone + ' is callling...' };
-    var data = { from: user.id, socketId: socket.id };
-    OneSignal.postNotification(contents, data, device);
+  // _call(contact){
+  //   if (container.state.status != 'ready'){
+  //     return;
+  //   }
+  //   callTo = contact;
+  //   console.log('call user', callTo.userId)
+  //   socket.emit('call', callTo.userId, function(res){
+  //     if (res.socketId){
+  //       console.log('call socket', res.socketId)
+  //       container.createPC(res.socketId, true);
+  //       container.setState({status: 'calling', info: 'Calling ' + callTo.fullName + '...'});
+  //     } else if (res.device) {
+  //       // direct push notification
+  //       container._push(res.device);
+  //       container.setState({status: 'calling', info: '*Calling ' + callTo.fullName + '...'});
+  //       // container.setState({status: 'calling', info: callTo.fullName + ' is offline, trying push notification...'});
+  //     }
+  //   });
+  // }
+
+  _push(to){
+    var contents = {en: to.fullName + ' is callling...' };
+    var data = { from: container.state.user.id, roomId: to.roomId };
+    OneSignal.postNotification(contents, data, to.device);
   }
 
   _hangup(){
