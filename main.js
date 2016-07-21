@@ -55,20 +55,18 @@ const configuration = {iceServers: [
   },
 ]};
 
-var pendingNotifications = [];
+// var pendingNotifications = [];
 
-function handleNotification (notification) {
-
-    console.log('handle notification', notification);
-
-    // _navigator.to('main.post', notification.data.title, {
-    //  article: {
-    //    title: notification.data.title,
-    //    link: notification.data.url,
-    //    action: notification.data.actionSelected
-    //  }
-    // });
-}
+// function handleNotification (notification) {
+//
+//     _navigator.to('main.post', notification.data.title, {
+//      article: {
+//        title: notification.data.title,
+//        link: notification.data.url,
+//        action: notification.data.actionSelected
+//      }
+//     });
+// }
 
 // Check permissions
 // OneSignal.checkPermissions((permissions) => {
@@ -118,16 +116,14 @@ class MainView extends Component{
     socket.on('exchange', function(data){
       container.exchange(data);
     });
+
     socket.on('leave', function(socketId){
       container.leave(socketId);
-    });
-    socket.on('hangup', function(from){
-      console.log('hangup', from);
-      for (var socketId in pcPeers) {
-        container.leave(socketId);
+      if (Object.keys(pcPeers).length == 0){
+        container.setState({status: 'ready', info: container.props.phone});
       }
-      container.setState({status: 'ready', info: container.props.phone});
     });
+
     socket.on('connect', function() {
       console.log('connect', socket.id);
       container.getLocalStream(function(stream) {
@@ -135,6 +131,7 @@ class MainView extends Component{
         container.setState({status: 'ready', info: container.props.phone});
       });
     });
+
     socket.on('user', function(user) {
       console.log('user', user.phone);
 
@@ -144,17 +141,15 @@ class MainView extends Component{
       OneSignal.configure({
           onIdsAvailable: function(device) {
             device.id = user._id;
-            console.log(device);
+            console.log('device', device.userId);
             // console.log('UserId = ', device.userId);
             // console.log('PushToken = ', device.pushToken);
             socket.emit('device', device);
           },
           onNotificationOpened: function(message, data, isActive) {
 
-            console.log('notification', data);
-
-            if (container.state.status != 'ready'){
-              return;
+            if (isActive || container.state.status != 'ready'){
+              return
             }
 
             var roomId = data.p2p_notification ? data.p2p_notification.roomId : data.roomId;
@@ -189,36 +184,26 @@ class MainView extends Component{
       container.setState({status: 'calling', info: name + ' is calling...'});
     });
 
-    socket.on('disconnected', function(device) {
-      console.log('peer disconnected');
-      // if one peer disconnected send push notification to reconnect
-      // if (callTo){
-      //   container._push(device)
-      //   container.setState({status: 'calling', info: '*Calling ' + callTo.fullName + '...'});
-      // }
-    });
   }
 
   getLocalStream(callback) {
     MediaStreamTrack.getSources(sourceInfos => {
-      console.log(sourceInfos);
+      // console.log(sourceInfos);
       getUserMedia({
         "audio": true,
         "video": false
       }, function (stream) {
-        console.log('stream', stream);
+        // console.log('stream', stream);
         callback(stream);
       }, logError);
     });
   }
 
   join(roomId) {
+    console.log('join', roomId);
     socket.emit('join', roomId, function(socketIds){
-      console.log('join', socketIds);
       for (const i in socketIds) {
-        const socketId = socketIds[i];
-        console.log('socketId', socketId)
-        container.createPC(socketId, true);
+        container.createPC(socketIds[i], true);
       }
     });
   }
@@ -229,7 +214,7 @@ class MainView extends Component{
     pcPeers[socketId] = pc;
 
     pc.onicecandidate = function (event) {
-      console.log('onicecandidate', event.candidate);
+      console.log('onicecandidate');
       if (event.candidate) {
         socket.emit('exchange', {'to': socketId, 'candidate': event.candidate });
       }
@@ -244,8 +229,11 @@ class MainView extends Component{
       console.log('*** oniceconnectionstatechange ***', event.target.iceConnectionState);
 
       if (event.target.iceConnectionState === 'disconnected') {
-        container.setState({status: 'ready', info: 'Peer disconnected'});
-        // container._hangup();
+        // container.setState({status: 'calling', info: 'Peer disconnected'});
+      }
+
+      if (event.target.iceConnectionState === 'closed') {
+        // container.setState({status: 'calling', info: 'Peer hangup'});
       }
 
       if (event.target.iceConnectionState === 'connected') {
@@ -302,9 +290,9 @@ class MainView extends Component{
 
     function createOffer() {
       pc.createOffer(function(desc) {
-        console.log('createOffer', desc);
+        // console.log('createOffer', desc);
         pc.setLocalDescription(desc, function () {
-          console.log('setLocalDescription', pc.localDescription);
+          // console.log('setLocalDescription', pc.localDescription);
           socket.emit('exchange', {'to': socketId, 'sdp': pc.localDescription });
         }, logError);
       }, logError);
@@ -323,19 +311,19 @@ class MainView extends Component{
     }
 
     if (data.sdp) {
-      console.log('exchange sdp', data);
+      // console.log('exchange sdp', data);
       pc.setRemoteDescription(new RTCSessionDescription(data.sdp), function () {
         if (pc.remoteDescription.type == "offer")
           pc.createAnswer(function(desc) {
-            console.log('createAnswer', desc);
+            // console.log('createAnswer', desc);
             pc.setLocalDescription(desc, function () {
-              console.log('setLocalDescription', pc.localDescription);
+              // console.log('setLocalDescription', pc.localDescription);
               socket.emit('exchange', {'to': fromId, 'sdp': pc.localDescription });
             }, logError);
           }, logError);
       }, logError);
     } else {
-      console.log('exchange candidate', data);
+      // console.log('exchange candidate', data);
       pc.addIceCandidate(new RTCIceCandidate(data.candidate));
     }
   }
@@ -345,8 +333,6 @@ class MainView extends Component{
     if (!pcPeers[socketId]) return;
     pcPeers[socketId].close();
     delete pcPeers[socketId];
-
-    container.setState({status: 'ready', info: container.props.phone});
   }
 
   _syncContacts(){
