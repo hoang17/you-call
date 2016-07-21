@@ -356,7 +356,7 @@ class MainView extends Component{
         container.setState({status: 'calling', info: 'Calling ' + contact.fullName + '...'});
       } else {
         // direct push notification
-        _push(res.device);
+        container._push(res.device);
         container.setState({status: 'calling', info: contact.fullName + ' is offline, trying push notification...'});
       }
     });
