@@ -120,6 +120,7 @@ class MainView extends Component{
     socket.on('leave', function(socketId){
       container.leave(socketId);
       if (Object.keys(pcPeers).length == 0){
+        socket.emit('leave');
         container.setState({status: 'ready', info: container.props.phone});
       }
     });
@@ -356,7 +357,7 @@ class MainView extends Component{
       return;
     }
     var user = container.state.user;
-    var roomId = user.phone.substr(user.phone.length-4);
+    var roomId = container._getRoomId(user.phone, contact.phone);
     container.join(roomId);
     callTo = contact;
     socket.emit('call', {to: callTo.userId, roomId: roomId, phone: callTo.phone}, function(data){
@@ -364,6 +365,12 @@ class MainView extends Component{
       container._push(data);
     });
     container.setState({status: 'calling', info: 'Calling ' + callTo.fullName + '...'});
+  }
+
+  _getRoomId(p1, p2){
+    var s1 = p1.substr(p1.length-4);
+    var s2 = p2.substr(p2.length-4);
+    return s1 < s2 ? s1 + '-' + s2 : s2 + '-' + s1;
   }
 
   // _call(contact){
