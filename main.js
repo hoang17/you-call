@@ -33,11 +33,11 @@ var socket;
 var callTo;
 const configuration = {iceServers: [
   {url:'stun:stun.l.google.com:19302'},
-  {url:'stun:stun1.l.google.com:19302'},
-  {url:'stun:stun2.l.google.com:19302'},
-  {url:'stun:stun3.l.google.com:19302'},
-  {url:'stun:stun4.l.google.com:19302'},
-  {url:'stun:stun.services.mozilla.com'},
+  // {url:'stun:stun1.l.google.com:19302'},
+  // {url:'stun:stun2.l.google.com:19302'},
+  // {url:'stun:stun3.l.google.com:19302'},
+  // {url:'stun:stun4.l.google.com:19302'},
+  // {url:'stun:stun.services.mozilla.com'},
   {
     url: 'turn:188.166.191.174:3478',
     credential: 'otoke123',
@@ -103,14 +103,14 @@ class MainView extends Component{
     // socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket'], query: 'phone='+this.props.phone});
 
     // @hoang load turn dynamically
-    fetch("https://computeengineondemand.appspot.com/turn?username=iapprtc&key=4080218913", { method: "GET" })
-    .then((response) => response.json())
-    .then((item) => {
-      if (!item.uris) return
-      item.uris.forEach(function(url){
-        configuration.iceServers.push({ username: item.username, credential: item.password, url: url})
-      })
-    }).done();
+    // fetch("https://computeengineondemand.appspot.com/turn?username=iapprtc&key=4080218913", { method: "GET" })
+    // .then((response) => response.json())
+    // .then((item) => {
+    //   if (!item.uris) return
+    //   item.uris.forEach(function(url){
+    //     configuration.iceServers.push({ username: item.username, credential: item.password, url: url})
+    //   })
+    // }).done();
 
     socket.on('exchange', function(data){
       container.exchange(data);
@@ -166,7 +166,7 @@ class MainView extends Component{
             if (socket.connected){
               container.join(pendingnoti.roomId);
               container.setState({status: 'calling', info: message});
-}
+            }
           },
       });
 
