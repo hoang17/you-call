@@ -55,18 +55,7 @@ const configuration = {iceServers: [
   },
 ]};
 
-// var pendingNotifications = [];
-
-// function handleNotification (notification) {
-//
-//     _navigator.to('main.post', notification.data.title, {
-//      article: {
-//        title: notification.data.title,
-//        link: notification.data.url,
-//        action: notification.data.actionSelected
-//      }
-//     });
-// }
+var pendingNotification;
 
 // Check permissions
 // OneSignal.checkPermissions((permissions) => {
@@ -100,6 +89,8 @@ class MainView extends Component{
       user:null,
     };
 
+    console.log('MainView initializing...');
+
     // socket = io.connect('youcall.herokuapp.com', {transports: ['websocket'], query: 'phone='+this.props.phone});
     socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket'], query: 'phone='+this.props.phone});
 
@@ -131,6 +122,10 @@ class MainView extends Component{
         localStream = stream;
         container.setState({status: 'ready', info: container.props.phone});
       });
+      if (pendingNotification){
+        handleNotification(pendingNotification.message, pendingNotification.data);
+        pendingNotification = null;
+      }
     });
 
     socket.on('user', function(user) {
@@ -153,26 +148,22 @@ class MainView extends Component{
               return
             }
 
-            var roomId = data.p2p_notification ? data.p2p_notification.roomId : data.roomId;
-
-            // console.log('call socket', socketId);
-            // container.createPC(socketId, true);
-            container.join(roomId)
-            container.setState({status: 'calling', info: message});
-
-            // var notification = {message: message, data: data, isActive: isActive};
-            // console.log('NOTIFICATION OPENED: ', notification);
-
-            //if (!_navigator) { // If we want to wait for an object to get initialized
-            //    console.log('Navigator is null, adding notification to pending list...');
-                // pendingNotifications.push(notification);
-            //    return;
-            // }
-            // handleNotification(notification);
+            if (socket.connected){
+              handleNotification(message, data)
+            }else{
+              pendingNotification = {message: message, data: data};
+            }
           },
       });
 
     });
+
+    function handleNotification (message, data) {
+      var roomId = data.p2p_notification ? data.p2p_notification.roomId : data.roomId;
+      container.join(roomId)
+      container.setState({status: 'calling', info: message});
+    }
+
 
     socket.on('call', function(data) {
       console.log('call', data);
