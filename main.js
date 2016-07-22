@@ -90,6 +90,7 @@ class MainView extends Component{
       contacts:[],
       user:null,
       phone:null,
+      device:null,
     };
 
     socket = io.connect('youcall.herokuapp.com', {transports: ['websocket']});
@@ -117,31 +118,31 @@ class MainView extends Component{
       }
       else{
         var LoginView = require("./login");
-        this.props.navigator.push({
+        container.props.navigator.push({
           title: "Login",
           component: LoginView,
-          passProps: {setUser:container._setUser},
+          passProps: { socket: socket, setUser:container._setUser},
         });
       }
     }).done();
 
     OneSignal.configure({
         onIdsAvailable: function(device) {
+          container.setState({device: device.userId});
+          if (!container.state.user){
+            return;
+          }
           device.id = container.state.user._id;
           container.state.user.device = device.userId;
           socket.emit('device', device);
           log('device', device.userId);
         },
         onNotificationOpened: function(message, data, isActive) {
-
           if (isActive || container.state.status != 'ready'){
             return
           }
-
           container.setState({status: 'calling', info: message});
-          
           pendingnoti = {roomId: data.p2p_notification ? data.p2p_notification.roomId : data.roomId, message: message};
-
           if (socket.connected){
             container.join(pendingnoti.roomId);
             container.setState({status: 'calling', info: message});
@@ -163,6 +164,11 @@ class MainView extends Component{
 
     socket.on('connect', function() {
       log('connect', socket.id);
+
+      if (!container.state.user){
+        return;
+      }
+
       socket.emit('auth', container.state.user.phone, function(user){
         log('auth', user._id);
       });
@@ -188,6 +194,9 @@ class MainView extends Component{
   }
 
   _setUser(user){
+    if (!user.device){
+      user.device = container.state.device;
+    }
     container.setState({user: user});
     container.setState({phone: user.phone});
     container.setState({contacts: user.contacts});
@@ -353,6 +362,8 @@ class MainView extends Component{
         socket.emit('sync contacts', contacts, function(activeContacts){
           log('activeContacts', activeContacts);
           container.setState({contacts: activeContacts});
+          container.state.user.contacts = activeContacts;
+          AsyncStorage.setItem('user', JSON.stringify(container.state.user));
           container.setState({status: 'ready', info:'found ' + Object.keys(activeContacts).length +' active contacts'});
         });
       }
@@ -399,6 +410,7 @@ class MainView extends Component{
   render() {
     return (
       <View style={styles.outerContainer}>
+        { this.state.user ?
         <KeyboardAvoidingView behavior='padding' style={styles.container}>
           <View>
             <Text style={styles.description}>{this.state.info}</Text>
@@ -421,7 +433,7 @@ class MainView extends Component{
               <Text style={styles.buttonText}>Hang Up</Text>
             </TouchableHighlight> : null }
           </View>
-        </KeyboardAvoidingView>
+        </KeyboardAvoidingView> : null }
       </View>
     );
   }

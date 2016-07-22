@@ -24,19 +24,19 @@ module.exports = React.createClass({
           }
           contact.fullName = [contact.firstName, contact.lastName].join(' ');
           return (
-            <View style={{padding:5}} key={contact.recordID}>
+            <View style={{padding:5}} key={key}>
               <TouchableHighlight
                 style={styles.button}
                 underlayColor='#99d9f4'
                 onPress={this.props.callback.bind(this, contact)}
                 >
                 <Text style={styles.buttonText}>{contact.fullName} ({contact.phone.substr(contact.phone.length-4)})</Text>
-                {/*{contact.phoneNumbers.map((e) => {
-                  return (
-                      <Text key={e.number} style={styles.buttonText}>{e.label}: {e.number}</Text>
-                  )
-                })}*/}
               </TouchableHighlight>
+              {contact.phoneNumbers.map((e) => {
+                return (
+                    <Text key={e.number}>{e.label}: {e.number}</Text>
+                )
+              })}
             </View>
           )
         })}

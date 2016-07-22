@@ -32,6 +32,7 @@ class LoginView extends Component{
   }
 
   onLogin(error, response) {
+
     if (error && error.code !== 1) {
       this.setState({ logged: false, error: true, response: {} });
       console.log('onLogin', error);
@@ -41,6 +42,8 @@ class LoginView extends Component{
       this.setState({ logged: logged, error: false, response: response });
 
       console.log('onLogin response', response);
+
+      var me = this;
 
       fetch('https://api.digits.com/1.1/sdk/account.json', {
         method: 'GET',
@@ -58,11 +61,11 @@ class LoginView extends Component{
         var phone = responseJson.phone_number;
 
         if (phone && phone != 'undefined'){
-          socket.emit('auth', user.phone, function(user){
+          me.props.socket.emit('auth', phone, function(user){
             console.log('auth', user.phone);
             AsyncStorage.setItem('user', JSON.stringify(user));
-            this.props._setUser(user);
-            this.props.navigator.pop();
+            me.props.setUser(user);
+            me.props.navigator.pop();
           });
         }
 
