@@ -94,9 +94,11 @@ class MainView extends Component{
     AsyncStorage.getItem("user").then((jstring) => {
       if (jstring){
         var user = JSON.parse(jstring);
-        container.setState({user: user});
-        container.setState({contacts: user.contacts});
-        container.setState({info: user.phone});
+        if (user.phone){
+          container.setState({user: user});
+          container.setState({contacts: user.contacts});
+          container.setState({info: user.phone});
+        }
       }
     }).done();
 
