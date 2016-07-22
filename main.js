@@ -140,7 +140,6 @@ class MainView extends Component{
       var ready = noti ? false : true;
       container.getLocalStream(function(stream) {
         localStream = stream;
-        if (ready) container.setState({status: 'ready', info: container.props.phone});
       });
 
       // handling pending push notification
