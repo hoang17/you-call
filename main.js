@@ -137,8 +137,9 @@ class MainView extends Component{
           if (isActive || container.state.status != 'ready'){
             return
           }
+
+          container.setState({status: 'calling', info: message});
           
-          container.setState({status: 'calling', info: pendingnoti.message});
           pendingnoti = {roomId: data.p2p_notification ? data.p2p_notification.roomId : data.roomId, message: message};
 
           if (socket.connected){
