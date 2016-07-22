@@ -10,6 +10,7 @@ import {
   TextInput,
   ListView,
   KeyboardAvoidingView,
+  AsyncStorage,
 } from 'react-native';
 import io from 'socket.io-client/socket.io';
 import {
@@ -90,14 +91,21 @@ class MainView extends Component{
 
     container = this;
 
+    AsyncStorage.getItem("user").then((jstring) => {
+      if (jstring){
+        var user = JSON.parse(jstring);
+        container.setState({user: user});
+        container.setState({contacts: user.contacts});
+        container.setState({info: user.phone});
+      }
+    }).done();
+
     this.state = {
       info: 'Initializing',
       status: 'init',
       contacts:[],
       user:null,
     };
-
-    console.log('MainView initializing...');
 
     socket = io.connect('youcall.herokuapp.com', {transports: ['websocket'], query: 'phone='+this.props.phone});
     // socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket'], query: 'phone='+this.props.phone});
@@ -126,11 +134,13 @@ class MainView extends Component{
 
     socket.on('connect', function() {
       console.log('connect', socket.id);
+
       var ready = noti ? false : true;
       container.getLocalStream(function(stream) {
         localStream = stream;
         if (ready) container.setState({status: 'ready', info: container.props.phone});
       });
+
       // handling pending push notification
       if (noti){
         container.join(noti.roomId);
@@ -144,16 +154,21 @@ class MainView extends Component{
     });
 
     socket.on('user', function(user) {
+
       console.log('user', user.phone);
 
-      container.setState({user: user});
-      container.setState({contacts: user.contacts});
+      if (!this.state.user){
+        container.setState({user: user});
+        container.setState({contacts: user.contacts});
+        AsyncStorage.setItem('user', JSON.stringify(user));
+      }
 
       OneSignal.configure({
           onIdsAvailable: function(device) {
             device.id = user._id;
-            console.log('device', device.userId);
+            this.state.user.device = device.userId;
             socket.emit('device', device);
+            console.log('device', device.userId);
           },
           onNotificationOpened: function(message, data, isActive) {
             if (isActive || container.state.status != 'ready'){
