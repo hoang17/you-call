@@ -104,7 +104,7 @@ class MainView extends Component{
 
     this.state = {
       info: 'Initializing',
-      status: 'init',
+      status: 'ready',
       contacts:[],
       user:null,
     };
