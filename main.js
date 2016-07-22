@@ -157,7 +157,7 @@ class MainView extends Component{
 
       console.log('user', user.phone);
 
-      if (!this.state.user){
+      if (!container.state.user){
         container.setState({user: user});
         container.setState({contacts: user.contacts});
         AsyncStorage.setItem('user', JSON.stringify(user));
