@@ -43,8 +43,6 @@ class LoginView extends Component{
 
       console.log('onLogin response', response);
 
-      var me = this;
-
       fetch('https://api.digits.com/1.1/sdk/account.json', {
         method: 'GET',
         headers: {
@@ -56,15 +54,22 @@ class LoginView extends Component{
       .then((response) => response.json())
       .then((responseJson) => {
         // return responseJson.movies;
-        console.log('ditgits response', responseJson);
+        // console.log('ditgits response', responseJson);
 
-        var phone = responseJson.phone_number;
+        var number = responseJson.phone_number;
 
-        if (phone && phone != 'undefined'){
-          me.props.socket.emit('auth', phone, function(user){
-            console.log('auth', user.phone);
-            AsyncStorage.setItem('user', JSON.stringify(user));
-            me.props.setUser(user);
+        var me = this;
+
+        if (number && number != 'undefined'){
+          me.props.socket.emit('auth', number, function(phone){
+            console.log('auth', phone._id);
+            var device = me.props.main.state.device;
+            if (!phone.device && device){
+              me.props.socket.emit('device', device);
+              console.log('device', device);
+            }
+            me.props.main._setPhone(phone);
+            AsyncStorage.setItem('phone', JSON.stringify(phone));
             me.props.navigator.pop();
           });
         }

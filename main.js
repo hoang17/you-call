@@ -31,7 +31,7 @@ const pcPeers = {};
 let localStream;
 var container;
 var socket;
-var callTo;
+
 const configuration = {iceServers: [
   {url:'stun:stun.l.google.com:19302'},
   // {url:'stun:stun1.l.google.com:19302'},
@@ -88,13 +88,12 @@ class MainView extends Component{
       info:'Initializing',
       status:'ready',
       contacts:[],
-      user:null,
       phone:null,
       device:null,
     };
 
-    socket = io.connect('youcall.herokuapp.com', {transports: ['websocket']});
-    // socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket']});
+    // socket = io.connect('youcall.herokuapp.com', {transports: ['websocket']});
+    socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket']});
 
     // @hoang load turn dynamically
     // fetch("https://computeengineondemand.appspot.com/turn?username=iapprtc&key=4080218913", { method: "GET" })
@@ -110,32 +109,37 @@ class MainView extends Component{
       localStream = stream;
     });
 
-    AsyncStorage.getItem("user").then((jstring) => {
-      var user = jstring ? JSON.parse(jstring) : null;
-      if (user && user.phone){
-        log('user', user.phone);
-        container._setUser(user);
+    AsyncStorage.getItem("phone").then((jstring) => {
+      var phone = null;
+      try{
+        phone = jstring ? JSON.parse(jstring) : null;
+      } catch(e){}
+      if (phone && phone._id){
+        log('phone', phone._id);
+        container._setPhone(phone);
       }
       else{
         var LoginView = require("./login");
         container.props.navigator.push({
           title: "Login",
           component: LoginView,
-          passProps: { socket: socket, setUser:container._setUser},
+          passProps: { socket: socket, main:container},
         });
       }
     }).done();
 
     OneSignal.configure({
-        onIdsAvailable: function(device) {
-          container.setState({device: device.userId});
-          if (!container.state.user){
+        onIdsAvailable: function(data) {
+          var device = data.userId
+          container.setState({device: device});
+          if (!container.state.phone){
             return;
           }
-          device.id = container.state.user._id;
-          container.state.user.device = device.userId;
-          socket.emit('device', device);
-          log('device', device.userId);
+          if (container.state.phone.device != device){
+            container.state.phone.device = device;
+            socket.emit('device', device);
+            log('device', device);
+          }
         },
         onNotificationOpened: function(message, data, isActive) {
           if (isActive || container.state.status != 'ready'){
@@ -158,19 +162,19 @@ class MainView extends Component{
       container.leave(socketId);
       if (Object.keys(pcPeers).length == 0){
         socket.emit('leave');
-        container.setState({status: 'ready', info: container.state.phone});
+        container.setState({status: 'ready', info: container.state.phone._id});
       }
     });
 
     socket.on('connect', function() {
       log('connect', socket.id);
 
-      if (!container.state.user){
+      if (!container.state.phone){
         return;
       }
 
-      socket.emit('auth', container.state.user.phone, function(user){
-        log('auth', user._id);
+      socket.emit('auth', container.state.phone._id, function(phone){
+        log('auth', phone._id);
       });
       // handling pending push notification
       if (pendingnoti){
@@ -187,20 +191,19 @@ class MainView extends Component{
       }
       container.join(data.roomId);
       var from = container.state.contacts[data.from];
-      var name = from ? from.fullName : data.fromNumber;
+      var name = from ? from.fullName : data.from;
       container.setState({status: 'calling', info: name + ' is calling...'});
     });
 
   }
 
-  _setUser(user){
-    if (!user.device){
-      user.device = container.state.device;
+  _setPhone(phone){
+    if (!phone.device && container.state.device){
+      phone.device = container.state.device;
     }
-    container.setState({user: user});
-    container.setState({phone: user.phone});
-    container.setState({contacts: user.contacts});
-    container.setState({info: user.phone});
+    container.setState({phone: phone});
+    container.setState({contacts: phone.contacts});
+    container.setState({info: phone._id});
   }
 
   getLocalStream(callback) {
@@ -362,8 +365,8 @@ class MainView extends Component{
         socket.emit('sync contacts', contacts, function(activeContacts){
           log('activeContacts', activeContacts);
           container.setState({contacts: activeContacts});
-          container.state.user.contacts = activeContacts;
-          AsyncStorage.setItem('user', JSON.stringify(container.state.user));
+          container.state.phone.contacts = activeContacts;
+          AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
           container.setState({status: 'ready', info:'found ' + Object.keys(activeContacts).length +' active contacts'});
         });
       }
@@ -374,15 +377,14 @@ class MainView extends Component{
     if (container.state.status != 'ready'){
       return;
     }
-    var user = container.state.user;
-    var roomId = container._getRoomId(user.phone, contact.phone);
+    var phone = container.state.phone;
+    var roomId = container._getRoomId(phone._id, contact.number);
     container.join(roomId);
-    callTo = contact;
-    socket.emit('call', {to: callTo.userId, roomId: roomId, phone: callTo.phone}, function(data){
+    socket.emit('call', {to: contact.number, roomId: roomId}, function(data){
       data.roomId = roomId;
       container._push(data);
     });
-    container.setState({status: 'calling', info: 'Calling ' + callTo.fullName + '...'});
+    container.setState({status: 'calling', info: 'Calling ' + contact.fullName + '...'});
   }
 
   _getRoomId(p1, p2){
@@ -393,7 +395,7 @@ class MainView extends Component{
 
   _push(to){
     var contents = {en: to.fullName + ' is callling...' };
-    var data = { from: container.state.user._id, roomId: to.roomId };
+    var data = { from: container.state.phone._id, roomId: to.roomId };
     log('push', data);
     OneSignal.postNotification(contents, data, to.device);
   }
@@ -404,13 +406,13 @@ class MainView extends Component{
       container.leave(socketId);
     }
     socket.emit('hangup');
-    container.setState({status: 'ready', info: container.state.phone});
+    container.setState({status: 'ready', info: container.state.phone._id});
   }
 
   render() {
     return (
       <View style={styles.outerContainer}>
-        { this.state.user ?
+        { this.state.phone ?
         <KeyboardAvoidingView behavior='padding' style={styles.container}>
           <View>
             <Text style={styles.description}>{this.state.info}</Text>
@@ -445,7 +447,7 @@ function logError(error) {
 
 function log(msg, data) {
   if (data){
-    console.log('[YouCall]['+msg+'] ', data);
+    console.log('[YouCall]['+msg+']', data);
   } else {
     console.log('[YouCall]['+msg+']');
   }
