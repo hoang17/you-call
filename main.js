@@ -91,6 +91,17 @@ class MainView extends Component{
 
     container = this;
 
+    this.state = {
+      info:'Initializing',
+      status:'ready',
+      contacts:[],
+      user:null,
+      phone:null,
+    };
+
+    socket = io.connect('youcall.herokuapp.com', {transports: ['websocket']});
+    // socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket'], query: 'phone='+this..ping.youcall});
+
     AsyncStorage.getItem("user").then((jstring) => {
       var user = jstring ? JSON.parse(jstring) : null;
       if (user && user.phone){
@@ -98,6 +109,7 @@ class MainView extends Component{
         container.setState({phone: user.phone});
         container.setState({contacts: user.contacts});
         container.setState({info: user.phone});
+        socket.emit('auth', user.phone);
       }
       else{
         var LoginView = require("./login");
@@ -107,17 +119,6 @@ class MainView extends Component{
         });
       }
     }).done();
-
-    this.state = {
-      info:'Initializing',
-      status:'ready',
-      contacts:[],
-      user:null,
-      phone:null,
-    };
-
-    socket = io.connect('youcall.herokuapp.com', {transports: ['websocket'], query: 'phone='+this.state.phone});
-    // socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket'], query: 'phone='+this..ping.youcall});
 
     // @hoang load turn dynamically
     // fetch("https://computeengineondemand.appspot.com/turn?username=iapprtc&key=4080218913", { method: "GET" })
