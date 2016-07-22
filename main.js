@@ -166,7 +166,7 @@ class MainView extends Component{
       OneSignal.configure({
           onIdsAvailable: function(device) {
             device.id = user._id;
-            this.state.user.device = device.userId;
+            container.state.user.device = device.userId;
             socket.emit('device', device);
             console.log('device', device.userId);
           },
