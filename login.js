@@ -58,7 +58,12 @@ class LoginView extends Component{
         var phone = responseJson.phone_number;
 
         if (phone && phone != 'undefined'){
-          this.props.navigator.pop();
+          socket.emit('auth', user.phone, function(user){
+            console.log('auth', user.phone);
+            AsyncStorage.setItem('user', JSON.stringify(user));
+            this.props._setUser(user);
+            this.props.navigator.pop();
+          });
         }
 
       })

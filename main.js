@@ -56,19 +56,12 @@ const configuration = {iceServers: [
   },
 ]};
 
-var noti;
-var pendingnoti = {
-  roomId: null,
-  message: null,
-  callback: function(){
-    noti = { message: pendingnoti.message, roomId: pendingnoti.roomId };
-  },
-};
+var pendingnoti = null;
 
 
 // Check permissions
 // OneSignal.checkPermissions((permissions) => {
-//     console.log(permissions);
+//     log(permissions);
 // });
 
 // Setting requestPermissions
@@ -100,25 +93,7 @@ class MainView extends Component{
     };
 
     socket = io.connect('youcall.herokuapp.com', {transports: ['websocket']});
-    // socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket'], query: 'phone='+this..ping.youcall});
-
-    AsyncStorage.getItem("user").then((jstring) => {
-      var user = jstring ? JSON.parse(jstring) : null;
-      if (user && user.phone){
-        container.setState({user: user});
-        container.setState({phone: user.phone});
-        container.setState({contacts: user.contacts});
-        container.setState({info: user.phone});
-        socket.emit('auth', user.phone);
-      }
-      else{
-        var LoginView = require("./login");
-        this.props.navigator.push({
-          title: "Login",
-          component: LoginView,
-        });
-      }
-    }).done();
+    // socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket']});
 
     // @hoang load turn dynamically
     // fetch("https://computeengineondemand.appspot.com/turn?username=iapprtc&key=4080218913", { method: "GET" })
@@ -129,6 +104,48 @@ class MainView extends Component{
     //     configuration.iceServers.push({ username: item.username, credential: item.password, url: url})
     //   })
     // }).done();
+
+    this.getLocalStream(function(stream) {
+      localStream = stream;
+    });
+
+    AsyncStorage.getItem("user").then((jstring) => {
+      var user = jstring ? JSON.parse(jstring) : null;
+      if (user && user.phone){
+        log('user', user.phone);
+        container._setUser(user);
+      }
+      else{
+        var LoginView = require("./login");
+        this.props.navigator.push({
+          title: "Login",
+          component: LoginView,
+          passProps: {setUser:container._setUser},
+        });
+      }
+    }).done();
+
+    OneSignal.configure({
+        onIdsAvailable: function(device) {
+          device.id = container.state.user._id;
+          container.state.user.device = device.userId;
+          socket.emit('device', device);
+          log('device', device.userId);
+        },
+        onNotificationOpened: function(message, data, isActive) {
+
+          if (isActive || container.state.status != 'ready'){
+            return
+          }
+
+          pendingnoti = {roomId: data.p2p_notification ? data.p2p_notification.roomId : data.roomId, message: message};
+
+          if (socket.connected){
+            container.join(pendingnoti.roomId);
+            container.setState({status: 'calling', info: message});
+          }
+        },
+    });
 
     socket.on('exchange', function(data){
       container.exchange(data);
@@ -143,62 +160,20 @@ class MainView extends Component{
     });
 
     socket.on('connect', function() {
-      console.log('connect', socket.id);
-
-      var ready = noti ? false : true;
-      container.getLocalStream(function(stream) {
-        localStream = stream;
+      log('connect', socket.id);
+      socket.emit('auth', container.state.user.phone, function(user){
+        log('auth', user._id);
       });
-
       // handling pending push notification
-      if (noti){
-        container.join(noti.roomId);
-        container.setState({status: 'calling', info: noti.message});
-        noti = null;
+      if (pendingnoti){
+        container.join(pendingnoti.roomId);
+        container.setState({status: 'calling', info: pendingnoti.message});
+        pendingnoti = null;
       }
-    });
-
-    socket.on('error', function(err) {
-      pendingnoti.callback()
-    });
-
-    socket.on('user', function(user) {
-
-      console.log('user', user.phone);
-
-      if (!container.state.user){
-        container.setState({user: user});
-        container.setState({phone: user.phone});
-        container.setState({contacts: user.contacts});
-        AsyncStorage.setItem('user', JSON.stringify(user));
-      }
-
-      OneSignal.configure({
-          onIdsAvailable: function(device) {
-            device.id = user._id;
-            container.state.user.device = device.userId;
-            socket.emit('device', device);
-            console.log('device', device.userId);
-          },
-          onNotificationOpened: function(message, data, isActive) {
-            if (isActive || container.state.status != 'ready'){
-              return
-            }
-
-            pendingnoti.roomId = data.p2p_notification ? data.p2p_notification.roomId : data.roomId;
-            pendingnoti.message = message;
-
-            if (socket.connected){
-              container.join(pendingnoti.roomId);
-              container.setState({status: 'calling', info: message});
-            }
-          },
-      });
-
     });
 
     socket.on('call', function(data) {
-      console.log('call', data);
+      log('call', data);
       if (container.state.status != 'ready'){
         return;
       }
@@ -210,21 +185,28 @@ class MainView extends Component{
 
   }
 
+  _setUser(user){
+    container.setState({user: user});
+    container.setState({phone: user.phone});
+    container.setState({contacts: user.contacts});
+    container.setState({info: user.phone});
+  }
+
   getLocalStream(callback) {
     MediaStreamTrack.getSources(sourceInfos => {
-      // console.log(sourceInfos);
+      // log(sourceInfos);
       getUserMedia({
         "audio": true,
         "video": false
       }, function (stream) {
-        // console.log('stream', stream);
+        // log('stream', stream);
         callback(stream);
       }, logError);
     });
   }
 
   join(roomId) {
-    console.log('join', roomId);
+    log('join', roomId);
     socket.emit('join', roomId, function(socketIds){
       for (const i in socketIds) {
         container.createPC(socketIds[i], true);
@@ -238,19 +220,19 @@ class MainView extends Component{
     pcPeers[socketId] = pc;
 
     pc.onicecandidate = function (event) {
-      console.log('onicecandidate');
+      log('onicecandidate');
       if (event.candidate) {
         socket.emit('exchange', {'to': socketId, 'candidate': event.candidate });
       }
     };
     pc.onnegotiationneeded = function () {
-      console.log('onnegotiationneeded');
+      log('onnegotiationneeded');
       if (isOffer) {
         createOffer();
       }
     }
     pc.oniceconnectionstatechange = function(event) {
-      console.log('*** oniceconnectionstatechange ***', event.target.iceConnectionState);
+      log('*** oniceconnectionstatechange ***', event.target.iceConnectionState);
 
       if (event.target.iceConnectionState === 'disconnected') {
         // container.setState({status: 'calling', info: 'Peer disconnected'});
@@ -266,21 +248,21 @@ class MainView extends Component{
       }
     };
     pc.onsignalingstatechange = function(event) {
-      console.log('onsignalingstatechange', event.target.signalingState);
+      log('onsignalingstatechange', event.target.signalingState);
     };
     pc.ondatachannel = function(event){
-      console.log("### ondatachannel ###");
+      log("### ondatachannel ###");
       // dataChannel = event.channel;
       // dataChannel.onmessage = function (event) {
-      //   console.log("dataChannel.onmessage:", event.data);
+      //   log("dataChannel.onmessage:", event.data);
       //   container.receiveTextData({user: socketId, message: event.data});
       // };
     }
     pc.onaddstream = function (event) {
-      console.log('onaddstream');
+      log('onaddstream');
     };
     pc.onremovestream = function (event) {
-      console.log('onremovestream');
+      log('onremovestream');
     };
     pc.addStream(localStream);
 
@@ -293,20 +275,20 @@ class MainView extends Component{
     //   var dataChannel = pc.createDataChannel("text");
     //
     //   dataChannel.onerror = function (error) {
-    //     console.log("dataChannel.onerror", error);
+    //     log("dataChannel.onerror", error);
     //   };
     //
     //   dataChannel.onmessage = function (event) {
-    //     console.log("dataChannel.onmessage:", event.data);
+    //     log("dataChannel.onmessage:", event.data);
     //     container.receiveTextData({user: socketId, message: event.data});
     //   };
     //
     //   dataChannel.onopen = function () {
-    //     console.log('dataChannel.onopen');
+    //     log('dataChannel.onopen');
     //   };
     //
     //   dataChannel.onclose = function () {
-    //     console.log("dataChannel.onclose");
+    //     log("dataChannel.onclose");
     //   };
     //
     //   pc.textDataChannel = dataChannel;
@@ -314,9 +296,9 @@ class MainView extends Component{
 
     function createOffer() {
       pc.createOffer(function(desc) {
-        // console.log('createOffer', desc);
+        // log('createOffer', desc);
         pc.setLocalDescription(desc, function () {
-          // console.log('setLocalDescription', pc.localDescription);
+          // log('setLocalDescription', pc.localDescription);
           socket.emit('exchange', {'to': socketId, 'sdp': pc.localDescription });
         }, logError);
       }, logError);
@@ -330,30 +312,30 @@ class MainView extends Component{
     if (fromId in pcPeers) {
       pc = pcPeers[fromId];
     } else {
-      console.log('@@@ exchange pc @@@', fromId)
+      log('@@@ exchange pc @@@', fromId)
       pc = container.createPC(fromId, false);
     }
 
     if (data.sdp) {
-      // console.log('exchange sdp', data);
+      // log('exchange sdp', data);
       pc.setRemoteDescription(new RTCSessionDescription(data.sdp), function () {
         if (pc.remoteDescription.type == "offer")
           pc.createAnswer(function(desc) {
-            // console.log('createAnswer', desc);
+            // log('createAnswer', desc);
             pc.setLocalDescription(desc, function () {
-              // console.log('setLocalDescription', pc.localDescription);
+              // log('setLocalDescription', pc.localDescription);
               socket.emit('exchange', {'to': fromId, 'sdp': pc.localDescription });
             }, logError);
           }, logError);
       }, logError);
     } else {
-      // console.log('exchange candidate', data);
+      // log('exchange candidate', data);
       pc.addIceCandidate(new RTCIceCandidate(data.candidate));
     }
   }
 
   leave(socketId) {
-    console.log('leave', socketId);
+    log('leave', socketId);
     if (!pcPeers[socketId]) return;
     pcPeers[socketId].close();
     delete pcPeers[socketId];
@@ -367,7 +349,7 @@ class MainView extends Component{
       else{
         container.setState({status: 'ready', info:'begin syncing ' + contacts.length +' contacts...'});
         socket.emit('sync contacts', contacts, function(activeContacts){
-          console.log('activeContacts', activeContacts);
+          log('activeContacts', activeContacts);
           container.setState({contacts: activeContacts});
           container.setState({status: 'ready', info:'found ' + Object.keys(activeContacts).length +' active contacts'});
         });
@@ -398,12 +380,13 @@ class MainView extends Component{
 
   _push(to){
     var contents = {en: to.fullName + ' is callling...' };
-    var data = { from: container.state.user.id, roomId: to.roomId };
+    var data = { from: container.state.user._id, roomId: to.roomId };
+    log('push', data);
     OneSignal.postNotification(contents, data, to.device);
   }
 
   _hangup(){
-    console.log('_hangup');
+    log('_hangup');
     for (var socketId in pcPeers) {
       container.leave(socketId);
     }
@@ -443,7 +426,15 @@ class MainView extends Component{
 }
 
 function logError(error) {
-  console.log("logError", error);
+  console.log("[YouCall][Error]", error);
+}
+
+function log(msg, data) {
+  if (data){
+    console.log('[YouCall]['+msg+'] ', data);
+  } else {
+    console.log('[YouCall]['+msg+']');
+  }
 }
 
 const styles = StyleSheet.create({
