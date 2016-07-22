@@ -16,24 +16,10 @@ import {
 var Digits = require('react-native-fabric-digits');
 var { DigitsLoginButton, DigitsLogoutButton } = Digits;
 
-var MainView = require("./main");
-
-
 class LoginView extends Component{
 
   constructor(props) {
     super(props);
-
-    AsyncStorage.getItem("phone").then((phone) => {
-      if (phone){
-        console.log('AsyncStorage phone', phone);
-        this.props.navigator.push({
-          title: "Main",
-          component: MainView,
-          passProps: {phone: phone},
-        });
-      }
-    }).done();
 
     this.onLogin = this.onLogin.bind(this);
     this.onLogout = this.onLogout.bind(this);
@@ -72,13 +58,7 @@ class LoginView extends Component{
         var phone = responseJson.phone_number;
 
         if (phone && phone != 'undefined'){
-          AsyncStorage.setItem('phone', phone);
-
-          this.props.navigator.push({
-            title: "Main",
-            component: MainView,
-            passProps: {phone: phone},
-          });
+          this.props.navigator.pop();
         }
 
       })

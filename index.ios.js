@@ -17,7 +17,7 @@ import {
   NavigatorIOS,
 } from 'react-native';
 
-var LoginView = require("./login");
+var MainView = require("./main");
 
 var YouCall = React.createClass({
 
@@ -30,7 +30,7 @@ var YouCall = React.createClass({
           <NavigatorIOS
             navigationBarHidden={true}
             style={styles.navigationContainer}
-            initialRoute={{ title: "Login", component: LoginView }}
+            initialRoute={{ title: "Main", component: MainView }}
           />
       );
   }

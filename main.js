@@ -92,25 +92,32 @@ class MainView extends Component{
     container = this;
 
     AsyncStorage.getItem("user").then((jstring) => {
-      if (jstring){
-        var user = JSON.parse(jstring);
-        if (user.phone){
-          container.setState({user: user});
-          container.setState({contacts: user.contacts});
-          container.setState({info: user.phone});
-        }
+      var user = jstring ? JSON.parse(jstring) : null;
+      if (user && user.phone){
+        container.setState({user: user});
+        container.setState({phone: user.phone});
+        container.setState({contacts: user.contacts});
+        container.setState({info: user.phone});
+      }
+      else{
+        var LoginView = require("./login");
+        this.props.navigator.push({
+          title: "Login",
+          component: LoginView,
+        });
       }
     }).done();
 
     this.state = {
-      info: 'Initializing',
-      status: 'ready',
+      info:'Initializing',
+      status:'ready',
       contacts:[],
       user:null,
+      phone:null,
     };
 
-    socket = io.connect('youcall.herokuapp.com', {transports: ['websocket'], query: 'phone='+this.props.phone});
-    // socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket'], query: 'phone='+this.props.phone});
+    socket = io.connect('youcall.herokuapp.com', {transports: ['websocket'], query: 'phone='+this.state.phone});
+    // socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket'], query: 'phone='+this..ping.youcall});
 
     // @hoang load turn dynamically
     // fetch("https://computeengineondemand.appspot.com/turn?username=iapprtc&key=4080218913", { method: "GET" })
@@ -130,7 +137,7 @@ class MainView extends Component{
       container.leave(socketId);
       if (Object.keys(pcPeers).length == 0){
         socket.emit('leave');
-        container.setState({status: 'ready', info: container.props.phone});
+        container.setState({status: 'ready', info: container.state.phone});
       }
     });
 
@@ -160,6 +167,7 @@ class MainView extends Component{
 
       if (!container.state.user){
         container.setState({user: user});
+        container.setState({phone: user.phone});
         container.setState({contacts: user.contacts});
         AsyncStorage.setItem('user', JSON.stringify(user));
       }
@@ -399,7 +407,7 @@ class MainView extends Component{
       container.leave(socketId);
     }
     socket.emit('hangup');
-    container.setState({status: 'ready', info: container.props.phone});
+    container.setState({status: 'ready', info: container.state.phone});
   }
 
   render() {
