@@ -19,7 +19,7 @@ module.exports = React.createClass({
       <ScrollView>
         {keys.map((key) => {
           var contact = this.props.contacts[key];
-          contact.fullName = [contact.firstName, , contact.middleName, contact.lastName].join(' ');
+          contact.fullName = [contact.firstName, , contact.middleName, contact.lastName].join(' ').trim();
           return (
             <View style={{padding:5}} key={key}>
               <TouchableHighlight
