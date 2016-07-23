@@ -408,6 +408,8 @@ class MainView extends Component{
   }
 
   leave(socketId) {
+    InCallManager.stopRingtone();
+    InCallManager.stop();
     log('leave', socketId);
     if (!pcPeers[socketId]) return;
     pcPeers[socketId].close();
