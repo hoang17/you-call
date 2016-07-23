@@ -146,7 +146,6 @@ class MainView extends Component{
           }
         },
         onNotificationOpened: function(message, data, isActive) {
-
           // alert(message);
 
           var from = data.p2p_notification ? data.p2p_notification.from : data.from;
@@ -181,7 +180,8 @@ class MainView extends Component{
     });
 
     socket.on('answer', function(number){
-      InCallManager.stopRingback();
+      InCallManager.stopRingtone();
+      InCallManager.stop();
       var from = container.state.contacts[number];
       var name = from ? from.fullName + '\n' + number : number;
       container.setState({status: 'calling', info: name + '\n answering your call...'});
@@ -316,8 +316,6 @@ class MainView extends Component{
 
       if (event.target.iceConnectionState === 'connected') {
         container.setState({status: 'connected', info: 'Peer connected'});
-        InCallManager.stopRingtone();
-        InCallManager.start();
         // createDataChannel();
       }
     };
@@ -334,6 +332,7 @@ class MainView extends Component{
     }
     pc.onaddstream = function (event) {
       log('onaddstream');
+      InCallManager.stopRingtone();
     };
     pc.onremovestream = function (event) {
       log('onremovestream');
@@ -438,7 +437,10 @@ class MainView extends Component{
       return;
     }
     log('call', contact.number);
+
+    // InCallManager.start();
     InCallManager.start({media: 'audio', ringback: '_DTMF_'}); // _BUNDLE_ or _DEFAULT_ or _DTMF_
+
     var phone = container.state.phone;
     var room = container._getRoomId(phone._id, contact.number);
     socket.emit('call', {to: contact.number, room: room}, function(socketIds){

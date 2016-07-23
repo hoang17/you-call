@@ -23,7 +23,7 @@
 {
   NSURL *jsCodeLocation;
 
-#ifdef DEBUG
+//#ifdef DEBUG
   /**
    * Loading JavaScript code - uncomment the one to use
    *
@@ -33,8 +33,8 @@
    * on the same Wi-Fi network.
    */
 
-   [[RCTBundleURLProvider sharedSettings] setDefaults];
-   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+//   [[RCTBundleURLProvider sharedSettings] setDefaults];
+//   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
   
   /**
    * OPTION 2 - For offline
@@ -44,18 +44,18 @@
    * simulator in the "Release" build configuration.
    */
   
-//  jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+  jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 
-#else
+//#else
 
   /**
    * OPTION 3 - For stagging or release
    * Load from CodePush bundled
    */
   
-  jsCodeLocation = [CodePush bundleURL];
+//  jsCodeLocation = [CodePush bundleURL];
 
-#endif
+//#endif
   
   
   [Fabric with:@[[Digits class]]];
