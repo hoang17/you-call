@@ -180,8 +180,8 @@ class MainView extends Component{
     });
 
     socket.on('answer', function(number){
-      InCallManager.stopRingtone();
-      InCallManager.stop();
+      // InCallManager.stopRingtone();
+      // InCallManager.stop();
       var from = container.state.contacts[number];
       var name = from ? from.fullName + '\n' + number : number;
       container.setState({status: 'calling', info: name + '\n answering your call...'});
@@ -243,7 +243,7 @@ class MainView extends Component{
       // ring back to caller
       socket.emit('ringback', data.from);
 
-      InCallManager.startRingtone('_BUNDLE_');
+      // InCallManager.startRingtone('_BUNDLE_');
 
       // join room
       container.join(data.room);
@@ -332,7 +332,7 @@ class MainView extends Component{
     }
     pc.onaddstream = function (event) {
       log('onaddstream');
-      InCallManager.stopRingtone();
+      // InCallManager.stopRingtone();
     };
     pc.onremovestream = function (event) {
       log('onremovestream');
@@ -408,8 +408,8 @@ class MainView extends Component{
   }
 
   leave(socketId) {
-    InCallManager.stopRingtone();
-    InCallManager.stop();
+    // InCallManager.stopRingtone();
+    // InCallManager.stop();
     log('leave', socketId);
     if (!pcPeers[socketId]) return;
     pcPeers[socketId].close();
@@ -441,7 +441,7 @@ class MainView extends Component{
     log('call', contact.number);
 
     // InCallManager.start();
-    InCallManager.start({media: 'audio', ringback: '_DTMF_'}); // _BUNDLE_ or _DEFAULT_ or _DTMF_
+    // InCallManager.start({media: 'audio', ringback: '_DTMF_'}); // _BUNDLE_ or _DEFAULT_ or _DTMF_
 
     var phone = container.state.phone;
     var room = container._getRoomId(phone._id, contact.number);
@@ -474,8 +474,6 @@ class MainView extends Component{
 
   _hangup(){
     log('_hangup');
-    InCallManager.stopRingtone();
-    InCallManager.stop();
     for (var socketId in pcPeers) {
       container.leave(socketId);
     }

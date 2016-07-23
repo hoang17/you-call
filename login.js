@@ -53,8 +53,6 @@ class LoginView extends Component{
       })
       .then((response) => response.json())
       .then((responseJson) => {
-        // return responseJson.movies;
-        // console.log('ditgits response', responseJson);
 
         var number = responseJson.phone_number;
 
