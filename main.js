@@ -82,6 +82,8 @@ class MainView extends Component{
   constructor(props) {
     super(props);
 
+    // alert('1')
+
     container = this;
 
     this.state = {
@@ -142,16 +144,44 @@ class MainView extends Component{
           }
         },
         onNotificationOpened: function(message, data, isActive) {
-          if (container.state.status != 'ready'){
-            return
+
+          // alert(message);
+
+          var from = data.p2p_notification ? data.p2p_notification.from : data.from;
+          var type = data.p2p_notification ? data.p2p_notification.type : data.type;
+
+          if (type == 'call'){
+            // ring back to caller
+            socket.emit('answer', from);
+
+            if (container.state.status != 'ready'){
+              return
+            }
+
+            container.setState({status: 'calling', info: message});
+            pendingnoti = {room: data.p2p_notification ? data.p2p_notification.room : data.room, message: message};
+            if (socket.connected){
+              container.join(pendingnoti.room);
+              container.setState({status: 'calling', info: message});
+            }
           }
-          container.setState({status: 'calling', info: message});
-          pendingnoti = {room: data.p2p_notification ? data.p2p_notification.room : data.room, message: message};
-          if (socket.connected){
-            container.join(pendingnoti.room);
+          else if (type == 'ringback' || type == 'answer'){
             container.setState({status: 'calling', info: message});
           }
+
         },
+    });
+
+    socket.on('ringback', function(number){
+      var from = container.state.contacts[number];
+      var name = from ? from.fullName + '\n' + number : number;
+      container.setState({status: 'calling', info: name + '\n ringing...'});
+    });
+
+    socket.on('answer', function(number){
+      var from = container.state.contacts[number];
+      var name = from ? from.fullName + '\n' + number : number;
+      container.setState({status: 'calling', info: name + '\n answering your call...'});
     });
 
     socket.on('exchange', function(data){
@@ -207,10 +237,14 @@ class MainView extends Component{
       if (container.state.status != 'ready'){
         return;
       }
+      // ring back to caller
+      socket.emit('ringback', data.from);
+
+      // join room
       container.join(data.room);
       var from = container.state.contacts[data.from];
       var name = from ? from.fullName + '\n' + from.number : from.number;
-      container.setState({status: 'calling', info: name});
+      container.setState({status: 'calling', info: name + '\n connecting...'});
     });
 
   }
@@ -410,7 +444,7 @@ class MainView extends Component{
     //   container._push(data);
     // });
     // container.join(room);
-    container.setState({status: 'calling', info: contact.fullName + '\n' + contact.number});
+    container.setState({status: 'calling', info: contact.fullName + '\n' + contact.number + '\n calling...'});
   }
 
   _getRoomId(p1, p2){
