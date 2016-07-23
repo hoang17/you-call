@@ -413,7 +413,7 @@ class MainView extends Component{
   }
 
   _push(to){
-    var contents = {en: to.fullName };
+    var contents = {en: to.content };
     var data = { from: container.state.phone._id, roomId: to.roomId };
     log('push', data);
     OneSignal.postNotification(contents, data, to.device);
