@@ -142,13 +142,13 @@ class MainView extends Component{
           }
         },
         onNotificationOpened: function(message, data, isActive) {
-          if (isActive || container.state.status != 'ready'){
+          if (container.state.status != 'ready'){
             return
           }
           container.setState({status: 'calling', info: message});
-          pendingnoti = {roomId: data.p2p_notification ? data.p2p_notification.roomId : data.roomId, message: message};
+          pendingnoti = {room: data.p2p_notification ? data.p2p_notification.room : data.room, message: message};
           if (socket.connected){
-            container.join(pendingnoti.roomId);
+            container.join(pendingnoti.room);
             container.setState({status: 'calling', info: message});
           }
         },
@@ -196,7 +196,7 @@ class MainView extends Component{
 
       // handling pending push notification
       if (pendingnoti){
-        container.join(pendingnoti.roomId);
+        container.join(pendingnoti.room);
         container.setState({status: 'calling', info: pendingnoti.message});
         pendingnoti = null;
       }
@@ -207,7 +207,7 @@ class MainView extends Component{
       if (container.state.status != 'ready'){
         return;
       }
-      container.join(data.roomId);
+      container.join(data.room);
       var from = container.state.contacts[data.from];
       var name = from ? from.fullName + '\n' + from.number : from.number;
       container.setState({status: 'calling', info: name});
@@ -237,9 +237,10 @@ class MainView extends Component{
     });
   }
 
-  join(roomId) {
-    log('join', roomId);
-    socket.emit('join', roomId, function(socketIds){
+  join(room) {
+    log('join', room);
+    socket.emit('join', room, function(socketIds){
+      log('socketIds', socketIds);
       for (const i in socketIds) {
         container.createPC(socketIds[i], true);
       }
@@ -395,14 +396,20 @@ class MainView extends Component{
     if (container.state.status != 'ready'){
       return;
     }
+    log('call', contact.number);
     var phone = container.state.phone;
-    var roomId = container._getRoomId(phone._id, contact.number);
-    container.join(roomId);
-    socket.emit('call', {to: contact.number, roomId: roomId});
+    var room = container._getRoomId(phone._id, contact.number);
+    socket.emit('call', {to: contact.number, room: room}, function(socketIds){
+      log('socketIds', socketIds);
+      for (const i in socketIds) {
+        container.createPC(socketIds[i], true);
+      }
+    });
     // direct push when server can not push
     // , function(data){
     //   container._push(data);
     // });
+    // container.join(room);
     container.setState({status: 'calling', info: contact.fullName + '\n' + contact.number});
   }
 
@@ -414,7 +421,7 @@ class MainView extends Component{
 
   _push(to){
     var contents = {en: to.content };
-    var data = { from: container.state.phone._id, roomId: to.roomId };
+    var data = { from: container.state.phone._id, room: to.room };
     log('push', data);
     OneSignal.postNotification(contents, data, to.device);
   }
