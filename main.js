@@ -26,6 +26,8 @@ import OneSignal from 'react-native-onesignal';
 
 var ContactList = require('./components/ContactList')
 import AddressBook from 'react-native-addressbook'
+import InCallManager from 'react-native-incall-manager';
+
 
 const pcPeers = {};
 let localStream;
@@ -179,6 +181,7 @@ class MainView extends Component{
     });
 
     socket.on('answer', function(number){
+      InCallManager.stopRingback();
       var from = container.state.contacts[number];
       var name = from ? from.fullName + '\n' + number : number;
       container.setState({status: 'calling', info: name + '\n answering your call...'});
@@ -239,6 +242,8 @@ class MainView extends Component{
       }
       // ring back to caller
       socket.emit('ringback', data.from);
+
+      InCallManager.startRingtone('_BUNDLE_');
 
       // join room
       container.join(data.room);
@@ -311,6 +316,8 @@ class MainView extends Component{
 
       if (event.target.iceConnectionState === 'connected') {
         container.setState({status: 'connected', info: 'Peer connected'});
+        InCallManager.stopRingtone();
+        InCallManager.start();
         // createDataChannel();
       }
     };
@@ -431,6 +438,7 @@ class MainView extends Component{
       return;
     }
     log('call', contact.number);
+    InCallManager.start({media: 'audio', ringback: '_DTMF_'}); // _BUNDLE_ or _DEFAULT_ or _DTMF_
     var phone = container.state.phone;
     var room = container._getRoomId(phone._id, contact.number);
     socket.emit('call', {to: contact.number, room: room}, function(socketIds){
@@ -462,6 +470,8 @@ class MainView extends Component{
 
   _hangup(){
     log('_hangup');
+    InCallManager.stopRingtone();
+    InCallManager.stop();
     for (var socketId in pcPeers) {
       container.leave(socketId);
     }

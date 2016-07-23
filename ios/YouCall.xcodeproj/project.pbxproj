@@ -29,6 +29,8 @@
 		374766701D40064D009F6E53 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3747666C1D40064D009F6E53 /* Images.xcassets */; };
 		374766711D40064D009F6E53 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3747666D1D40064D009F6E53 /* main.m */; };
 		374766861D4006C4009F6E53 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 374766841D4006C4009F6E53 /* LaunchScreen.xib */; };
+		379CB24C1D43F394003A3170 /* RNInCallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 379CB24A1D43F394003A3170 /* RNInCallManager.swift */; };
+		379CB24D1D43F394003A3170 /* RNInCallManagerBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 379CB24B1D43F394003A3170 /* RNInCallManagerBridge.m */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		BE003A29903C4D6494E8B0D6 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 79A7DD80845D462E93C6F3D1 /* libz.tbd */; };
 		BF772BB81D2E500700C3B0A8 /* libjingle_peerconnection_revision_build.txt in Resources */ = {isa = PBXBuildFile; fileRef = BF772BB31D2E500700C3B0A8 /* libjingle_peerconnection_revision_build.txt */; };
@@ -186,6 +188,9 @@
 		3747666C1D40064D009F6E53 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = YouCall/Images.xcassets; sourceTree = "<group>"; };
 		3747666D1D40064D009F6E53 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = YouCall/main.m; sourceTree = "<group>"; };
 		374766851D4006C4009F6E53 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = YouCall/Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
+		379CB2491D43F394003A3170 /* RNInCallManager-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RNInCallManager-Bridging-Header.h"; path = "../node_modules/react-native-incall-manager/ios/RNInCallManager/RNInCallManager-Bridging-Header.h"; sourceTree = "<group>"; };
+		379CB24A1D43F394003A3170 /* RNInCallManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RNInCallManager.swift; path = "../node_modules/react-native-incall-manager/ios/RNInCallManager/RNInCallManager.swift"; sourceTree = "<group>"; };
+		379CB24B1D43F394003A3170 /* RNInCallManagerBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RNInCallManagerBridge.m; path = "../node_modules/react-native-incall-manager/ios/RNInCallManager/RNInCallManagerBridge.m"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		79A7DD80845D462E93C6F3D1 /* libz.tbd */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		7BC9D94F52D44A478C8BFE3E /* libCodePush.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libCodePush.a; sourceTree = "<group>"; };
@@ -339,6 +344,7 @@
 		13B07FAE1A68108700A75B9A /* YouCall */ = {
 			isa = PBXGroup;
 			children = (
+				379CB24F1D43F3B8003A3170 /* RNInCallManager */,
 				3747666D1D40064D009F6E53 /* main.m */,
 				3747666A1D40064D009F6E53 /* Info.plist */,
 				3747666B1D40064D009F6E53 /* AppDelegate.h */,
@@ -388,6 +394,16 @@
 				376C5FDD1D345513004B2143 /* libCodePush.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		379CB24F1D43F3B8003A3170 /* RNInCallManager */ = {
+			isa = PBXGroup;
+			children = (
+				379CB2491D43F394003A3170 /* RNInCallManager-Bridging-Header.h */,
+				379CB24A1D43F394003A3170 /* RNInCallManager.swift */,
+				379CB24B1D43F394003A3170 /* RNInCallManagerBridge.m */,
+			);
+			name = RNInCallManager;
 			sourceTree = "<group>";
 		};
 		78C398B11ACF4ADC00677621 /* Products */ = {
@@ -873,7 +889,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				374766711D40064D009F6E53 /* main.m in Sources */,
+				379CB24D1D43F394003A3170 /* RNInCallManagerBridge.m in Sources */,
 				3747666E1D40064D009F6E53 /* AppDelegate.m in Sources */,
+				379CB24C1D43F394003A3170 /* RNInCallManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -897,6 +915,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEAD_CODE_STRIPPING = NO;
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -926,6 +945,7 @@
 			baseConfigurationReference = C3AD9839CEE2B3387BBC5A17 /* Pods-YouCall.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -969,6 +989,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -995,6 +1016,7 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "../node_modules/react-native-incall-manager/ios/RNInCallManager/RNInCallManager-Bridging-Header.h";
 			};
 			name = Debug;
 		};
@@ -1017,6 +1039,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -1036,6 +1059,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "../node_modules/react-native-incall-manager/ios/RNInCallManager/RNInCallManager-Bridging-Header.h";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
