@@ -62,7 +62,7 @@ class LoginView extends Component{
 
         if (number && number != 'undefined'){
           me.props.socket.emit('auth', number, function(phone){
-            console.log('auth', phone._id);
+            console.log('login auth', phone._id);
             var device = me.props.main.state.device;
             if (!phone.device && device){
               me.props.socket.emit('device', device);

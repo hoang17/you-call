@@ -92,8 +92,8 @@ class MainView extends Component{
       device:null,
     };
 
-    // socket = io.connect('youcall.herokuapp.com', {transports: ['websocket']});
-    socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket']});
+    socket = io.connect('youcall.herokuapp.com', {transports: ['websocket']});
+    // socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket']});
 
     // @hoang load turn dynamically
     // fetch("https://computeengineondemand.appspot.com/turn?username=iapprtc&key=4080218913", { method: "GET" })
@@ -174,8 +174,26 @@ class MainView extends Component{
       }
 
       socket.emit('auth', container.state.phone._id, function(phone){
-        log('auth', phone._id);
+
+        log('connect auth', phone._id);
+
+        // sync device to server
+        var device = container.state.device;
+        if (device && device != phone.device){
+          socket.emit('device', device);
+          log('sync device', device);
+        }
+
+        // sync contacts to server
+        var contacts = container.state.contacts;
+        var localLen = contacts ? Object.keys(contacts).length : 0;
+        var serverLen = phone.contacts ? Object.keys(phone.contacts).length : 0;
+        if (localLen > serverLen){
+            socket.emit('contacts', contacts);
+            log('sync contacts', localLen);
+        }
       });
+
       // handling pending push notification
       if (pendingnoti){
         container.join(pendingnoti.roomId);
@@ -363,7 +381,7 @@ class MainView extends Component{
       else{
         container.setState({status: 'ready', info:'begin syncing ' + contacts.length +' contacts...'});
         socket.emit('sync contacts', contacts, function(activeContacts){
-          log('activeContacts', activeContacts);
+          // log('activeContacts', activeContacts);
           container.setState({contacts: activeContacts});
           container.state.phone.contacts = activeContacts;
           AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
