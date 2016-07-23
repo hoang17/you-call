@@ -209,8 +209,8 @@ class MainView extends Component{
       }
       container.join(data.roomId);
       var from = container.state.contacts[data.from];
-      var name = from ? from.fullName : data.from;
-      container.setState({status: 'calling', info: name + ' is calling...'});
+      var name = from ? from.fullName + '\n' + from.number : from.number;
+      container.setState({status: 'calling', info: name});
     });
 
   }
@@ -398,11 +398,12 @@ class MainView extends Component{
     var phone = container.state.phone;
     var roomId = container._getRoomId(phone._id, contact.number);
     container.join(roomId);
-    socket.emit('call', {to: contact.number, roomId: roomId}, function(data){
-      data.roomId = roomId;
-      container._push(data);
-    });
-    container.setState({status: 'calling', info: 'Calling ' + contact.fullName + '...'});
+    socket.emit('call', {to: contact.number, roomId: roomId});
+    // direct push when server can not push
+    // , function(data){
+    //   container._push(data);
+    // });
+    container.setState({status: 'calling', info: contact.fullName + '\n' + contact.number});
   }
 
   _getRoomId(p1, p2){
@@ -412,7 +413,7 @@ class MainView extends Component{
   }
 
   _push(to){
-    var contents = {en: to.fullName + ' is callling...' };
+    var contents = {en: to.fullName };
     var data = { from: container.state.phone._id, roomId: to.roomId };
     log('push', data);
     OneSignal.postNotification(contents, data, to.device);
