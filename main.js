@@ -441,7 +441,7 @@ class MainView extends Component{
     log('call', contact.number);
 
     // InCallManager.start();
-    // InCallManager.start({media: 'audio', ringback: '_DTMF_'}); // _BUNDLE_ or _DEFAULT_ or _DTMF_
+    InCallManager.start({media: 'audio', ringback: '_DEFAULT_'}); // _BUNDLE_ or _DEFAULT_ or _DTMF_
 
     var phone = container.state.phone;
     var room = container._getRoomId(phone._id, contact.number);
@@ -474,6 +474,7 @@ class MainView extends Component{
 
   _hangup(){
     log('_hangup');
+    InCallManager.stop();
     for (var socketId in pcPeers) {
       container.leave(socketId);
     }
