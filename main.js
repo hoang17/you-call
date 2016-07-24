@@ -22,12 +22,13 @@ import {
   MediaStreamTrack,
   getUserMedia,
 } from 'react-native-webrtc';
-import OneSignal from 'react-native-onesignal';
 
-var ContactList = require('./components/ContactList')
+import OneSignal from 'react-native-onesignal';
 import AddressBook from 'react-native-addressbook'
 import InCallManager from 'react-native-incall-manager';
+import VoipPushNotification from 'react-native-voip-push-notification';
 
+var ContactList = require('./components/ContactList')
 
 const pcPeers = {};
 let localStream;
@@ -132,46 +133,120 @@ class MainView extends Component{
       }
     }).done();
 
-    OneSignal.configure({
-        onIdsAvailable: function(data) {
-          var device = data.userId
-          container.setState({device: device});
-          if (!container.state.phone){
-            return;
-          }
-          if (container.state.phone.device != device){
-            container.state.phone.device = device;
-            socket.emit('device', device);
-            log('device', device);
-          }
-        },
-        onNotificationOpened: function(message, data, isActive) {
-          // alert(message);
 
-          var from = data.p2p_notification ? data.p2p_notification.from : data.from;
-          var type = data.p2p_notification ? data.p2p_notification.type : data.type;
+    VoipPushNotification.requestPermissions(); // required
 
-          if (type == 'call'){
-            // ring back to caller
-            socket.emit('answer', from);
-
-            if (container.state.status != 'ready'){
-              return
-            }
-
-            container.setState({status: 'calling', info: message});
-            pendingnoti = {room: data.p2p_notification ? data.p2p_notification.room : data.room, message: message};
-            if (socket.connected){
-              container.join(pendingnoti.room);
-              container.setState({status: 'calling', info: message});
-            }
-          }
-          else if (type == 'ringback' || type == 'answer'){
-            container.setState({status: 'calling', info: message});
-          }
-
-        },
+    VoipPushNotification.addEventListener('register', (device) => {
+      container.setState({device: device});
+      if (container.state.phone && container.state.phone.device != device){
+        container.state.phone.device = device;
+        socket.emit('device', device);
+        log('device', device);
+      }
     });
+
+    VoipPushNotification.addEventListener('notification', (notification) => {
+
+      log('notification', notification);
+
+      var message = notification.getAlert().body;
+      var data = notification.getData();
+      var from = data.from;
+      var type = data.type;
+
+      if (type == 'call'){
+        // ring back to caller
+        socket.emit('answer', from);
+
+        if (container.state.status != 'ready'){
+          return
+        }
+
+        container.setState({status: 'calling', info: message});
+        pendingnoti = {room: data.room, message: message};
+        if (socket.connected){
+          container.join(pendingnoti.room);
+          container.setState({status: 'calling', info: message});
+        }
+      }
+      else if (type == 'ringback' || type == 'answer'){
+        container.setState({status: 'calling', info: message});
+      }
+
+      /* there is a boolean constant exported by this module called
+       * wakeupByPush
+       * you can use this constant to distinguish the app is launched
+       * by VoIP push notification or not
+       */
+       if (VoipPushNotification.wakeupByPush) {
+         // do something...
+
+         // remember to set this static variable to false
+         // since the constant are exported only at initialization time
+         // and it will keep the same in the whole app
+         VoipPushNotification.wakeupByPush = false;
+       }
+
+      /**
+       * Local Notification Payload
+       *
+       * - `alertBody` : The message displayed in the notification alert.
+       * - `alertAction` : The "action" displayed beneath an actionable notification. Defaults to "view";
+       * - `soundName` : The sound played when the notification is fired (optional).
+       * - `category`  : The category of this notification, required for actionable notifications (optional).
+       * - `userInfo`  : An optional object containing additional notification data.
+       */
+      var sound = notification.getSound();
+      VoipPushNotification.presentLocalNotification({
+          // alertBody: "hello! " + notification.getAlert()
+          alertBody: message,
+          applicationIconBadgeNumber: notification.getBadgeCount(),
+          soundName: sound ? sound : 'Marimba.m4r',
+          alertAction: 'answer call',
+          // category: '',
+          // userInfo: '',
+      });
+    });
+
+
+    // OneSignal.configure({
+    //     onIdsAvailable: function(data) {
+    //       var device = data.userId
+    //       container.setState({device: device});
+    //       var phone = container.state.phone
+    //       if (phone && phone.device != device){
+    //         phone.device = device;
+    //         socket.emit('device', device);
+    //         log('device', device);
+    //       }
+    //     },
+    //     onNotificationOpened: function(message, data, isActive) {
+    //       // alert(message);
+    //
+    //       var from = data.p2p_notification ? data.p2p_notification.from : data.from;
+    //       var type = data.p2p_notification ? data.p2p_notification.type : data.type;
+    //
+    //       if (type == 'call'){
+    //         // ring back to caller
+    //         socket.emit('answer', from);
+    //
+    //         if (container.state.status != 'ready'){
+    //           return
+    //         }
+    //
+    //         container.setState({status: 'calling', info: message});
+    //         pendingnoti = {room: data.p2p_notification ? data.p2p_notification.room : data.room, message: message};
+    //         if (socket.connected){
+    //           container.join(pendingnoti.room);
+    //           container.setState({status: 'calling', info: message});
+    //         }
+    //       }
+    //       else if (type == 'ringback' || type == 'answer'){
+    //         container.setState({status: 'calling', info: message});
+    //       }
+    //
+    //     },
+    // });
 
     socket.on('ringback', function(number){
       var from = container.state.contacts[number];
@@ -213,6 +288,7 @@ class MainView extends Component{
         // sync device to server
         var device = container.state.device;
         if (device && device != phone.device){
+          phone.device = device;
           socket.emit('device', device);
           log('sync device', device);
         }
