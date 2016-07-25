@@ -25,7 +25,7 @@
 {
   NSURL *jsCodeLocation;
 
-//#ifdef DEBUG
+#ifdef DEBUG
   /**
    * Loading JavaScript code - uncomment the one to use
    *
@@ -48,16 +48,16 @@
   
   jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 
-//#else
+#else
 
   /**
    * OPTION 3 - For stagging or release
    * Load from CodePush bundled
    */
   
-//  jsCodeLocation = [CodePush bundleURL];
+  jsCodeLocation = [CodePush bundleURL];
 
-//#endif
+#endif
   
   
   [Fabric with:@[[Digits class]]];
