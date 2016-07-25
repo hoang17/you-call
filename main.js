@@ -140,6 +140,7 @@ class MainView extends Component{
       container.setState({device: device});
       if (container.state.phone && container.state.phone.device != device){
         container.state.phone.device = device;
+        AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
         socket.emit('device', device);
         log('device', device);
       }

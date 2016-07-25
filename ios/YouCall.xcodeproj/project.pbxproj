@@ -25,7 +25,6 @@
 		372C18A41D3BE6BF000A5510 /* libRCTDigitsManager.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 372C18A31D3BE65C000A5510 /* libRCTDigitsManager.a */; };
 		3747663A1D3FFD6B009F6E53 /* libRCTOneSignal.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 374766331D3FFD53009F6E53 /* libRCTOneSignal.a */; };
 		3747666E1D40064D009F6E53 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 374766691D40064D009F6E53 /* AppDelegate.m */; };
-		3747666F1D40064D009F6E53 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3747666A1D40064D009F6E53 /* Info.plist */; };
 		374766701D40064D009F6E53 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3747666C1D40064D009F6E53 /* Images.xcassets */; };
 		374766711D40064D009F6E53 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3747666D1D40064D009F6E53 /* main.m */; };
 		374766861D4006C4009F6E53 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 374766841D4006C4009F6E53 /* LaunchScreen.xib */; };
@@ -35,7 +34,6 @@
 		379CB2951D454DC4003A3170 /* Marimba.m4r in Resources */ = {isa = PBXBuildFile; fileRef = 379CB2941D454DC4003A3170 /* Marimba.m4r */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		BE003A29903C4D6494E8B0D6 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 79A7DD80845D462E93C6F3D1 /* libz.tbd */; };
-		BF772BB81D2E500700C3B0A8 /* libjingle_peerconnection_revision_build.txt in Resources */ = {isa = PBXBuildFile; fileRef = BF772BB31D2E500700C3B0A8 /* libjingle_peerconnection_revision_build.txt */; };
 		BF772BB91D2E500700C3B0A8 /* libWebRTC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF772BB41D2E500700C3B0A8 /* libWebRTC.a */; };
 		BF772BC71D2E502A00C3B0A8 /* libRCTWebRTC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF772BC41D2E500700C3B0A8 /* libRCTWebRTC.a */; };
 		BF772BC91D2E503700C3B0A8 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF772BC81D2E503700C3B0A8 /* AVFoundation.framework */; };
@@ -834,9 +832,7 @@
 				374766861D4006C4009F6E53 /* LaunchScreen.xib in Resources */,
 				379CB2951D454DC4003A3170 /* Marimba.m4r in Resources */,
 				372C189C1D3BE599000A5510 /* DigitsKitResources.bundle in Resources */,
-				BF772BB81D2E500700C3B0A8 /* libjingle_peerconnection_revision_build.txt in Resources */,
 				374766701D40064D009F6E53 /* Images.xcassets in Resources */,
-				3747666F1D40064D009F6E53 /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
