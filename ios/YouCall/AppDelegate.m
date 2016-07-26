@@ -35,8 +35,8 @@
    * on the same Wi-Fi network.
    */
 
-//   [[RCTBundleURLProvider sharedSettings] setDefaults];
-//   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+   [[RCTBundleURLProvider sharedSettings] setDefaults];
+   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
   
   /**
    * OPTION 2 - For offline
@@ -46,7 +46,7 @@
    * simulator in the "Release" build configuration.
    */
   
-  jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+//  jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 
 //#else
 

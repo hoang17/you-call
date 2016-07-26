@@ -36,7 +36,7 @@ var container;
 var socket;
 
 const configuration = {iceServers: [
-  {url:'stun:stun.l.google.com:19302'},
+  // {url:'stun:stun.l.google.com:19302'},
   // {url:'stun:stun1.l.google.com:19302'},
   // {url:'stun:stun2.l.google.com:19302'},
   // {url:'stun:stun3.l.google.com:19302'},
@@ -47,38 +47,19 @@ const configuration = {iceServers: [
     credential: 'otoke123',
     username: 'client'
   },
-  {
-    url: 'turn:numb.viagenie.ca',
-    credential: 'youcal123',
-    username: 'jinnguyen019@gmail.com'
-  },
-  {
-    url: 'turn:numb.viagenie.ca',
-    credential: '123123',
-    username: 'lehuyhoang117@gmail.com'
-  },
+  // {
+  //   url: 'turn:numb.viagenie.ca',
+  //   credential: 'youcal123',
+  //   username: 'jinnguyen019@gmail.com'
+  // },
+  // {
+  //   url: 'turn:numb.viagenie.ca',
+  //   credential: '123123',
+  //   username: 'lehuyhoang117@gmail.com'
+  // },
 ]};
 
 var pendingnoti = null;
-
-
-// Check permissions
-// OneSignal.checkPermissions((permissions) => {
-//     log(permissions);
-// });
-
-// Setting requestPermissions
-// permissions = {
-//     alert: true,
-//     badge: true,
-//     sound: true
-// };
-// OneSignal.requestPermissions(permissions);
-
-// Calling registerForPushNotifications
-// Call when you want to prompt the user to accept push notifications.
-// Only call once and only if you passed false to *initWithLaunchOptions autoRegister*:.
-// OneSignal.registerForPushNotifications();
 
 class MainView extends Component{
 
@@ -157,12 +138,11 @@ class MainView extends Component{
       var type = data.type;
 
       if (type == 'call'){
-        // ring back to caller
-        socket.emit('answer', from);
-
         if (container.state.status != 'ready'){
           return
         }
+
+        socket.emit('answer', from);
 
         container.setState({status: 'calling', info: message});
         pendingnoti = {room: data.room, message: message};
@@ -172,7 +152,9 @@ class MainView extends Component{
         }
       }
       else if (type == 'ringback' || type == 'answer'){
-        container.setState({status: 'calling', info: message});
+        if (container.status == 'calling'){
+          container.setState({status: 'calling', info: message});
+        }
       }
 
       /* there is a boolean constant exported by this module called
@@ -205,50 +187,8 @@ class MainView extends Component{
           applicationIconBadgeNumber: notification.getBadgeCount(),
           soundName: sound ? sound : 'Marimba.m4r',
           alertAction: 'answer call',
-          // category: '',
-          // userInfo: '',
       });
     });
-
-
-    // OneSignal.configure({
-    //     onIdsAvailable: function(data) {
-    //       var device = data.userId
-    //       container.setState({device: device});
-    //       var phone = container.state.phone
-    //       if (phone && phone.device != device){
-    //         phone.device = device;
-    //         socket.emit('device', device);
-    //         log('device', device);
-    //       }
-    //     },
-    //     onNotificationOpened: function(message, data, isActive) {
-    //       // alert(message);
-    //
-    //       var from = data.p2p_notification ? data.p2p_notification.from : data.from;
-    //       var type = data.p2p_notification ? data.p2p_notification.type : data.type;
-    //
-    //       if (type == 'call'){
-    //         // ring back to caller
-    //         socket.emit('answer', from);
-    //
-    //         if (container.state.status != 'ready'){
-    //           return
-    //         }
-    //
-    //         container.setState({status: 'calling', info: message});
-    //         pendingnoti = {room: data.p2p_notification ? data.p2p_notification.room : data.room, message: message};
-    //         if (socket.connected){
-    //           container.join(pendingnoti.room);
-    //           container.setState({status: 'calling', info: message});
-    //         }
-    //       }
-    //       else if (type == 'ringback' || type == 'answer'){
-    //         container.setState({status: 'calling', info: message});
-    //       }
-    //
-    //     },
-    // });
 
     socket.on('ringback', function(number){
       var from = container.state.contacts[number];
@@ -257,11 +197,12 @@ class MainView extends Component{
     });
 
     socket.on('answer', function(number){
-      // InCallManager.stopRingtone();
-      // InCallManager.stop();
-      var from = container.state.contacts[number];
-      var name = from ? from.fullName + '\n' + number : number;
-      container.setState({status: 'calling', info: name + '\n answering your call...'});
+      if (container.status == 'calling'){
+        // InCallManager.stop();
+        var from = container.state.contacts[number];
+        var name = from ? from.fullName + '\n' + number : number;
+        container.setState({status: 'calling', info: name + '\n answering your call...'});
+      }
     });
 
     socket.on('exchange', function(data){
