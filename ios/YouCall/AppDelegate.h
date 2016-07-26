@@ -13,6 +13,6 @@
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (nonatomic, strong) UIWindow *window;
-@property (strong, nonatomic) RCTOneSignal* oneSignal;
+//@property (strong, nonatomic) RCTOneSignal* oneSignal;
 
 @end

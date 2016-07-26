@@ -97,6 +97,7 @@ class MainView extends Component{
       device:null,
     };
 
+    // socket = io.connect('youcall.io', {transports: ['websocket']});
     socket = io.connect('youcall.herokuapp.com', {transports: ['websocket']});
     // socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket']});
 
@@ -150,7 +151,7 @@ class MainView extends Component{
 
       log('notification', notification);
 
-      var message = notification.getAlert().body;
+      var message = notification.getAlert();
       var data = notification.getData();
       var from = data.from;
       var type = data.type;

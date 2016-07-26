@@ -14,18 +14,18 @@
 #import "RCTRootView.h"
 #import <Fabric/Fabric.h>
 #import <DigitsKit/DigitsKit.h>
-#import "RCTOneSignal.h"
+//#import "RCTOneSignal.h"
 #import <PushKit/PushKit.h>
 #import "RNVoipPushNotificationManager.h"
 
 @implementation AppDelegate
-@synthesize oneSignal = _oneSignal;
+//@synthesize oneSignal = _oneSignal;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   NSURL *jsCodeLocation;
 
-#ifdef DEBUG
+//#ifdef DEBUG
   /**
    * Loading JavaScript code - uncomment the one to use
    *
@@ -48,23 +48,23 @@
   
   jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 
-#else
+//#else
 
   /**
    * OPTION 3 - For stagging or release
    * Load from CodePush bundled
    */
   
-  jsCodeLocation = [CodePush bundleURL];
+//  jsCodeLocation = [CodePush bundleURL];
 
-#endif
+//#endif
   
   
   [Fabric with:@[[Digits class]]];
   
   
-  self.oneSignal = [[RCTOneSignal alloc] initWithLaunchOptions:launchOptions
-                                                         appId:@"b5d06e8d-6260-4c9b-84b3-b64a6895124b"];
+//  self.oneSignal = [[RCTOneSignal alloc] initWithLaunchOptions:launchOptions
+//                                                         appId:@"b5d06e8d-6260-4c9b-84b3-b64a6895124b"];
 
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
@@ -81,9 +81,9 @@
   return YES;
 }
 
-- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)notification {
-  [RCTOneSignal didReceiveRemoteNotification:notification];
-}
+//- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)notification {
+//  [RCTOneSignal didReceiveRemoteNotification:notification];
+//}
 
 
 /* Add PushKit delegate method */
