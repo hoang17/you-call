@@ -11,6 +11,8 @@ import {
   ListView,
   KeyboardAvoidingView,
   AsyncStorage,
+  AppState,
+  PushNotificationIOS,
 } from 'react-native';
 import io from 'socket.io-client/socket.io';
 import {
@@ -28,12 +30,14 @@ import AddressBook from 'react-native-addressbook'
 import VoipPushNotification from 'react-native-voip-push-notification';
 // import InCallManager from 'react-native-incall-manager';
 
-var ContactList = require('./components/ContactList')
+let ContactList = require('./components/ContactList')
 
 const pcPeers = {};
 let localStream;
-var container;
-var socket;
+let audioTrack;
+let container;
+let socket;
+let call;
 
 const configuration = {iceServers: [
   // {url:'stun:stun.l.google.com:19302'},
@@ -59,14 +63,13 @@ const configuration = {iceServers: [
   // },
 ]};
 
-var pendingnoti = null;
+// TODO
+let pendingnoti = null;
 
 class MainView extends Component{
 
   constructor(props) {
     super(props);
-
-    // alert('1')
 
     container = this;
 
@@ -94,6 +97,7 @@ class MainView extends Component{
 
     this.getLocalStream(function(stream) {
       localStream = stream;
+      audioTrack = localStream.getTrackById(0);
     });
 
     AsyncStorage.getItem("phone").then((jstring) => {
@@ -116,7 +120,7 @@ class MainView extends Component{
     }).done();
 
 
-    VoipPushNotification.requestPermissions(); // required
+    VoipPushNotification.requestPermissions();
 
     VoipPushNotification.addEventListener('register', (device) => {
       container.setState({device: device});
@@ -132,76 +136,63 @@ class MainView extends Component{
 
       log('notification', notification);
 
-      var message = notification.getAlert();
+      // var message = notification.getAlert();
+      var sound = notification.getSound();
       var data = notification.getData();
       var from = data.from;
       var type = data.type;
 
       if (type == 'call'){
-        if (container.state.status != 'ready'){
+        if (call != null){
           return
         }
 
-        socket.emit('answer', from);
+        call = { number: from, type: 'incoming', date: Date.now, duration: 0 };
 
-        container.setState({status: 'calling', info: message});
+        var c = container.state.contacts[call.number];
+        var name = c ? c.fullName + '\n' + call.number : call.number;
+        var message = name + '\n incoming call...';
+        container.setState({status: 'incoming', info: message});
+
+        VoipPushNotification.presentLocalNotification({
+            alertBody: message,
+            applicationIconBadgeNumber: notification.getBadgeCount(),
+            soundName: sound ? sound : 'Marimba.m4r',
+            alertAction: 'answer call',
+        });
+
+        // ring back to caller
+        socket.emit('ringback', call.number);
+
         pendingnoti = {room: data.room, message: message};
         if (socket.connected){
           container.join(pendingnoti.room);
-          container.setState({status: 'calling', info: message});
         }
       }
-      else if (type == 'ringback' || type == 'answer'){
-        if (container.status == 'calling'){
-          container.setState({status: 'calling', info: message});
-        }
-      }
-
-      /* there is a boolean constant exported by this module called
-       * wakeupByPush
-       * you can use this constant to distinguish the app is launched
-       * by VoIP push notification or not
-       */
-       if (VoipPushNotification.wakeupByPush) {
-         // do something...
-
-         // remember to set this static variable to false
-         // since the constant are exported only at initialization time
-         // and it will keep the same in the whole app
-         VoipPushNotification.wakeupByPush = false;
-       }
-
-      /**
-       * Local Notification Payload
-       *
-       * - `alertBody` : The message displayed in the notification alert.
-       * - `alertAction` : The "action" displayed beneath an actionable notification. Defaults to "view";
-       * - `soundName` : The sound played when the notification is fired (optional).
-       * - `category`  : The category of this notification, required for actionable notifications (optional).
-       * - `userInfo`  : An optional object containing additional notification data.
-       */
-      var sound = notification.getSound();
-      VoipPushNotification.presentLocalNotification({
-          // alertBody: "hello! " + notification.getAlert()
-          alertBody: message,
-          applicationIconBadgeNumber: notification.getBadgeCount(),
-          soundName: sound ? sound : 'Marimba.m4r',
-          alertAction: 'answer call',
-      });
     });
+
+    // if waked by local notification
+    PushNotificationIOS.addEventListener('localNotification', (notification) => {
+      // alert(AppState.currentState);
+      if (AppState.currentState == 'background') {
+        container._accept();
+      }
+    });
+
 
     socket.on('ringback', function(number){
-      var from = container.state.contacts[number];
-      var name = from ? from.fullName + '\n' + number : number;
-      container.setState({status: 'calling', info: name + '\n ringing...'});
-    });
-
-    socket.on('answer', function(number){
-      if (container.status == 'calling'){
-        // InCallManager.stop();
+      if (container.state.status == 'outgoing'){
         var from = container.state.contacts[number];
         var name = from ? from.fullName + '\n' + number : number;
-        container.setState({status: 'calling', info: name + '\n answering your call...'});
+        container.setState({info: name + '\n ringing...'});
+      }
+    });
+
+    socket.on('accept', function(number){
+      if (container.state.status == 'outgoing'){
+        audioTrack.enabled = true;
+        container.setState({ status: 'accept' });
+        log('accept', audioTrack.enabled);
       }
     });
 
@@ -209,12 +200,11 @@ class MainView extends Component{
       container.exchange(data);
     });
 
-    socket.on('leave', function(socketId){
+    socket.on('hangup', function(socketId){
+      call = null;
       container.leave(socketId);
-      if (Object.keys(pcPeers).length == 0){
-        socket.emit('leave');
-        container.setState({status: 'ready', info: container.state.phone._id});
-      }
+      socket.emit('leave');
+      container.setState({status: 'ready', info: container.state.phone._id});
     });
 
     socket.on('connect', function() {
@@ -226,7 +216,7 @@ class MainView extends Component{
 
       socket.emit('auth', container.state.phone._id, function(phone){
 
-        log('connect auth', phone._id);
+        log('auth', phone._id);
 
         // sync device to server
         var device = container.state.device;
@@ -249,26 +239,28 @@ class MainView extends Component{
       // handling pending push notification
       if (pendingnoti){
         container.join(pendingnoti.room);
-        container.setState({status: 'calling', info: pendingnoti.message});
         pendingnoti = null;
       }
     });
 
     socket.on('call', function(data) {
       log('call', data);
-      if (container.state.status != 'ready'){
+      if (call != null){
         return;
       }
+
+      call = { number: data.from, type: 'incoming', date: Date.now, duration: 0 };
+
       // ring back to caller
-      socket.emit('ringback', data.from);
+      socket.emit('ringback', call.number);
 
       // InCallManager.startRingtone('_BUNDLE_');
 
       // join room
       container.join(data.room);
-      var from = container.state.contacts[data.from];
+      var from = container.state.contacts[call.number];
       var name = from ? from.fullName + '\n' + from.number : from.number;
-      container.setState({status: 'calling', info: name + '\n connecting...'});
+      container.setState({status: 'incoming', info: name + '\n incoming call...'});
     });
 
   }
@@ -326,15 +318,25 @@ class MainView extends Component{
       log('*** oniceconnectionstatechange ***', event.target.iceConnectionState);
 
       if (event.target.iceConnectionState === 'disconnected') {
-        // container.setState({status: 'calling', info: 'Peer disconnected'});
+        if (call){
+          var from = container.state.contacts[call.number];
+          var name = from ? from.fullName + '\n' + from.number : from.number;
+          container.setState({ info: name + '\n disconnected'});
+        }
+        // container.setState({info: 'Peer connected'});
       }
 
       if (event.target.iceConnectionState === 'closed') {
-        // container.setState({status: 'calling', info: 'Peer hangup'});
+        // container.setState({info: 'Peer disconnected'});
       }
 
       if (event.target.iceConnectionState === 'connected') {
-        container.setState({status: 'connected', info: 'Peer connected'});
+        if (call){
+          var from = container.state.contacts[call.number];
+          var name = from ? from.fullName + '\n' + from.number : from.number;
+          container.setState({ info: name + '\n connected'});
+        }
+        // container.setState({info: 'Peer connected'});
         // createDataChannel();
       }
     };
@@ -351,6 +353,9 @@ class MainView extends Component{
     }
     pc.onaddstream = function (event) {
       log('onaddstream');
+      if (container.state.status != 'accept'){
+        audioTrack.enabled = false;
+      }
       // InCallManager.stopRingtone();
     };
     pc.onremovestream = function (event) {
@@ -457,6 +462,9 @@ class MainView extends Component{
     if (container.state.status != 'ready'){
       return;
     }
+
+    call = { number: contact.number, type: 'outgoing', date: Date.now, duration: 0 };
+
     log('call', contact.number);
 
     // InCallManager.start();
@@ -475,7 +483,7 @@ class MainView extends Component{
     //   container._push(data);
     // });
     // container.join(room);
-    container.setState({status: 'calling', info: contact.fullName + '\n' + contact.number + '\n calling...'});
+    container.setState({status: 'outgoing', info: contact.fullName + '\n' + contact.number + '\n calling...'});
   }
 
   _getRoomId(p1, p2){
@@ -484,21 +492,31 @@ class MainView extends Component{
     return s1 < s2 ? s1 + '-' + s2 : s2 + '-' + s1;
   }
 
-  _push(to){
-    var contents = {en: to.content };
-    var data = { from: container.state.phone._id, room: to.room };
-    log('push', data);
-    OneSignal.postNotification(contents, data, to.device);
-  }
-
   _hangup(){
-    log('_hangup');
+    log('hangup');
     // InCallManager.stop();
+    call = null;
     for (var socketId in pcPeers) {
       container.leave(socketId);
     }
     socket.emit('hangup');
     container.setState({status: 'ready', info: container.state.phone._id});
+  }
+
+  _accept(){
+    if (!call){
+      return;
+    }
+    audioTrack.enabled = true;
+    container.setState({ status: 'accept' });
+    // notify caller
+    socket.emit('accept', call.number);
+    log('accept', audioTrack.enabled);
+  }
+
+  _toggleMic(){
+    audioTrack.enabled = !audioTrack.enabled;
+    log('mic', audioTrack.enabled);
   }
 
   render() {
@@ -519,12 +537,19 @@ class MainView extends Component{
                 >
               <Text style={styles.buttonText}>Sync contacts</Text>
             </TouchableHighlight>
-            { this.state.status == 'calling' || this.state.status == 'connected' ?
-            <TouchableHighlight style={styles.button}
+            { this.state.status == 'outgoing' || this.state.status == 'incoming' || this.state.status == 'accept' ?
+            <TouchableHighlight style={styles.redbutton}
                 underlayColor='#99d9f4'
                 onPress={this._hangup}
                 >
               <Text style={styles.buttonText}>Hang Up</Text>
+            </TouchableHighlight> : null }
+            { this.state.status == 'incoming' ?
+            <TouchableHighlight style={styles.greenbutton}
+                underlayColor='#99d9f4'
+                onPress={this._accept}
+                >
+              <Text style={styles.buttonText}>Accept</Text>
             </TouchableHighlight> : null }
           </View>
         </KeyboardAvoidingView> : null }
@@ -584,6 +609,30 @@ const styles = StyleSheet.create({
 	  flexDirection: 'row',
 	  backgroundColor: '#48BBEC',
 	  borderColor: '#48BBEC',
+	  borderWidth: 1,
+	  borderRadius: 4,
+	  marginTop: 10,
+	  alignSelf: 'stretch',
+	  justifyContent: 'center'
+	},
+  redbutton: {
+	  height: 36,
+	  flex: 1,
+	  flexDirection: 'row',
+	  backgroundColor: 'red',
+	  borderColor: 'red',
+	  borderWidth: 1,
+	  borderRadius: 4,
+	  marginTop: 10,
+	  alignSelf: 'stretch',
+	  justifyContent: 'center'
+	},
+  greenbutton: {
+	  height: 36,
+	  flex: 1,
+	  flexDirection: 'row',
+	  backgroundColor: 'green',
+	  borderColor: 'green',
 	  borderWidth: 1,
 	  borderRadius: 4,
 	  marginTop: 10,

@@ -14,12 +14,12 @@
 #import "RCTRootView.h"
 #import <Fabric/Fabric.h>
 #import <DigitsKit/DigitsKit.h>
-//#import "RCTOneSignal.h"
 #import <PushKit/PushKit.h>
 #import "RNVoipPushNotificationManager.h"
+#import "RCTPushNotificationManager.h"
+
 
 @implementation AppDelegate
-//@synthesize oneSignal = _oneSignal;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -35,8 +35,11 @@
    * on the same Wi-Fi network.
    */
 
-   [[RCTBundleURLProvider sharedSettings] setDefaults];
-   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+//   [[RCTBundleURLProvider sharedSettings] setDefaults];
+//   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+
+//    jsCodeLocation = [NSURL URLWithString:@"http://192.168.100.10:8081/index.ios.bundle?platform=ios&dev=true"];
+
   
   /**
    * OPTION 2 - For offline
@@ -46,7 +49,7 @@
    * simulator in the "Release" build configuration.
    */
   
-//  jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+  jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 
 //#else
 
@@ -59,13 +62,7 @@
 
 //#endif
   
-  
   [Fabric with:@[[Digits class]]];
-  
-  
-//  self.oneSignal = [[RCTOneSignal alloc] initWithLaunchOptions:launchOptions
-//                                                         appId:@"b5d06e8d-6260-4c9b-84b3-b64a6895124b"];
-
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
                                                       moduleName:@"YouCall"
@@ -98,6 +95,31 @@
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type {
   // Process the received push
   [RNVoipPushNotificationManager didReceiveIncomingPushWithPayload:payload forType:(NSString *)type];
+}
+
+// Required to register for notifications
+- (void)application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings
+{
+  [RCTPushNotificationManager didRegisterUserNotificationSettings:notificationSettings];
+}
+// Required for the register event.
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+{
+  [RCTPushNotificationManager didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
+}
+// Required for the notification event.
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)notification
+{
+  [RCTPushNotificationManager didReceiveRemoteNotification:notification];
+}
+// Required for the localNotification event.
+- (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
+{
+  [RCTPushNotificationManager didReceiveLocalNotification:notification];
+}
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+{
+  NSLog(@"%@", error);
 }
 
 
