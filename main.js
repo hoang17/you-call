@@ -143,17 +143,18 @@ class MainView extends Component{
       var type = data.type;
 
       if (type == 'call'){
-        if (call != null){
+
+        if (AppState.currentState == 'active' && container.state.status == 'incoming') {
           return
         }
 
         call = { number: from, type: 'incoming', date: Date.now, duration: 0 };
 
-        var c = container.state.contacts[call.number];
-        var name = c ? c.fullName + '\n' + call.number : call.number;
+        var c = container.state.contacts[from];
+        var name = c ? c.fullName + '\n' + from : from;
         var message = name + '\n incoming call...';
-        container.setState({status: 'incoming', info: message});
 
+        // Show notification
         VoipPushNotification.presentLocalNotification({
             alertBody: message,
             applicationIconBadgeNumber: notification.getBadgeCount(),
@@ -161,11 +162,13 @@ class MainView extends Component{
             alertAction: 'answer call',
         });
 
-        // ring back to caller
-        socket.emit('ringback', call.number);
+        container.setState({status: 'incoming', info: message});
+
 
         pendingnoti = {room: data.room, message: message};
         if (socket.connected){
+          // ring back to caller
+          socket.emit('ringback', call.number);
           container.join(pendingnoti.room);
         }
       }
@@ -238,6 +241,7 @@ class MainView extends Component{
 
       // handling pending push notification
       if (pendingnoti){
+        socket.emit('ringback', call.number);
         container.join(pendingnoti.room);
         pendingnoti = null;
       }
