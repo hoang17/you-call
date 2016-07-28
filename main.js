@@ -412,7 +412,12 @@ class MainView extends Component{
         if (call){
           var from = container.state.contacts[call.number];
           var name = from ? from.fullName + '\n' + from.number : from.number;
-          container.setState({ info: name + '\n connected'});
+          if (container.state.status == 'outgoing'){
+            container.setState({ info: name + '\n waiting for accept...'});
+          }
+          else if (container.state.status == 'accept'){
+            container.setState({ info: name + '\n connected'});
+          }
         }
         // container.setState({info: 'Peer connected'});
         // createDataChannel();
