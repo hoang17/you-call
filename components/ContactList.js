@@ -25,7 +25,7 @@ module.exports = React.createClass({
               <TouchableHighlight
                 style={styles.button}
                 underlayColor='#99d9f4'
-                onPress={this.props.callback.bind(this, contact)}
+                onPress={this.props.callback.bind(this, key)}
                 >
                 <Text style={styles.buttonText}>{contact.fullName} ({contact.number.substr(contact.number.length-4)})</Text>
               </TouchableHighlight>

@@ -40,8 +40,8 @@ let socket;
 let call;
 
 const configuration = {iceServers: [
-  // {url:'stun:stun.l.google.com:19302'},
-  // {url:'stun:stun1.l.google.com:19302'},
+  {url:'stun:stun.l.google.com:19302'},
+  {url:'stun:stun1.l.google.com:19302'},
   // {url:'stun:stun2.l.google.com:19302'},
   // {url:'stun:stun3.l.google.com:19302'},
   // {url:'stun:stun4.l.google.com:19302'},
@@ -51,16 +51,16 @@ const configuration = {iceServers: [
     credential: 'otoke123',
     username: 'client'
   },
-  // {
-  //   url: 'turn:numb.viagenie.ca',
-  //   credential: 'youcal123',
-  //   username: 'jinnguyen019@gmail.com'
-  // },
-  // {
-  //   url: 'turn:numb.viagenie.ca',
-  //   credential: '123123',
-  //   username: 'lehuyhoang117@gmail.com'
-  // },
+  {
+    url: 'turn:numb.viagenie.ca',
+    credential: 'youcal123',
+    username: 'jinnguyen019@gmail.com'
+  },
+  {
+    url: 'turn:numb.viagenie.ca',
+    credential: '123123',
+    username: 'lehuyhoang117@gmail.com'
+  },
 ]};
 
 // TODO
@@ -136,49 +136,70 @@ class MainView extends Component{
 
       log('notification', notification);
 
-      // var message = notification.getAlert();
       var sound = notification.getSound();
       var data = notification.getData();
-      var from = data.from;
+      var number = data.from;
       var type = data.type;
+      var room = data.room;
 
       if (type == 'call'){
 
-        if (AppState.currentState == 'active' && container.state.status == 'incoming') {
-          return
-        }
+        // if (AppState.currentState == 'active' || container.state.status != 'incoming') {
+        //   return
+        // }
 
-        call = { number: from, type: 'incoming', date: Date.now, duration: 0 };
-
-        var c = container.state.contacts[from];
-        var name = c ? c.fullName + '\n' + from : from;
-        var message = name + '\n incoming call...';
+        if (call) return;
 
         // Show notification
+        var c = container.state.contacts[number];
         VoipPushNotification.presentLocalNotification({
-            alertBody: message,
-            applicationIconBadgeNumber: notification.getBadgeCount(),
-            soundName: sound ? sound : 'Marimba.m4r',
-            alertAction: 'answer call',
+          alertBody: (c ? c.fullName : number) + '\nincoming call...',
+          applicationIconBadgeNumber: notification.getBadgeCount(),
+          soundName: sound ? sound : 'Marimba.m4r',
+          alertAction: 'answer call',
+          userInfo: {number: number}
         });
 
-        container.setState({status: 'incoming', info: message});
+        pendingnoti = { number: number, room: room};
 
-
-        pendingnoti = {room: data.room, message: message};
         if (socket.connected){
-          // ring back to caller
-          socket.emit('ringback', call.number);
-          container.join(pendingnoti.room);
+
+          // try to join room
+          socket.emit('join', room, function(socketIds){
+            if (socketIds.length == 0){
+              return;
+            }
+
+            call = { number: number, type: 'incoming', date: Date.now, duration: 0 };
+
+            // ring back to caller
+            socket.emit('ringback', call.number);
+
+            // create pc
+            for (const i in socketIds) {
+              container.createPC(socketIds[i], true);
+            }
+
+            var info = (c ? c.fullName + '\n' + c.number : c.number) + '\nincoming call...';
+            container.setState({status: 'incoming', info: info});
+          });
+
         }
       }
     });
 
     // if waked by local notification
     PushNotificationIOS.addEventListener('localNotification', (notification) => {
-      // alert(AppState.currentState);
       if (AppState.currentState == 'background') {
-        container._accept();
+        if (call){
+          container._accept();
+        }
+        else if (container.state.status == 'ready'){
+          var number = notification.getData().number;
+          if (number){
+            container._call(number);
+          }
+        }
       }
     });
 
@@ -205,7 +226,10 @@ class MainView extends Component{
 
     socket.on('hangup', function(socketId){
       call = null;
-      container.leave(socketId);
+      for (var socketId in pcPeers) {
+        container.leave(socketId);
+      }
+      // container.leave(socketId);
       socket.emit('leave');
       container.setState({status: 'ready', info: container.state.phone._id});
     });
@@ -241,8 +265,30 @@ class MainView extends Component{
 
       // handling pending push notification
       if (pendingnoti){
-        socket.emit('ringback', call.number);
-        container.join(pendingnoti.room);
+
+        if (call) return;
+
+        // try to join room
+        socket.emit('join', pendingnoti.room, function(socketIds){
+          if (socketIds.length == 0){
+            return;
+          }
+
+          call = { number: pendingnoti.number, type: 'incoming', date: Date.now, duration: 0 };
+
+          // ring back to caller
+          socket.emit('ringback', call.number);
+
+          // create pc
+          for (const i in socketIds) {
+            container.createPC(socketIds[i], true);
+          }
+
+          var c = container.state.contacts[call.number];
+          var info = (c ? c.fullName + '\n' + c.number : c.number) + '\nincoming call...';
+          container.setState({status: 'incoming', info: info});
+        });
+
         pendingnoti = null;
       }
     });
@@ -252,21 +298,28 @@ class MainView extends Component{
       if (call != null){
         return;
       }
+      // try to join room
+      socket.emit('join', data.room, function(socketIds){
+        if (socketIds.length == 0){
+          return;
+        }
 
-      call = { number: data.from, type: 'incoming', date: Date.now, duration: 0 };
+        call = { number: data.from, type: 'incoming', date: Date.now, duration: 0 };
 
-      // ring back to caller
-      socket.emit('ringback', call.number);
+        // ring back to caller
+        socket.emit('ringback', call.number);
 
-      // InCallManager.startRingtone('_BUNDLE_');
+        // create pc
+        for (const i in socketIds) {
+          container.createPC(socketIds[i], true);
+        }
 
-      // join room
-      container.join(data.room);
-      var from = container.state.contacts[call.number];
-      var name = from ? from.fullName + '\n' + from.number : from.number;
-      container.setState({status: 'incoming', info: name + '\n incoming call...'});
+        var from = container.state.contacts[call.number];
+        var name = from ? from.fullName + '\n' + from.number : from.number;
+        container.setState({status: 'incoming', info: name + '\n incoming call...'});
+      });
+
     });
-
   }
 
   _setPhone(phone){
@@ -291,15 +344,15 @@ class MainView extends Component{
     });
   }
 
-  join(room) {
-    log('join', room);
-    socket.emit('join', room, function(socketIds){
-      log('socketIds', socketIds);
-      for (const i in socketIds) {
-        container.createPC(socketIds[i], true);
-      }
-    });
-  }
+  // join(room) {
+  //   log('join', room);
+  //   socket.emit('join', room, function(socketIds){
+  //     log('socketIds', socketIds);
+  //     for (const i in socketIds) {
+  //       container.createPC(socketIds[i], true);
+  //     }
+  //   });
+  // }
 
   createPC(socketId, isOffer) {
 
@@ -462,32 +515,31 @@ class MainView extends Component{
     })
   }
 
-  _call(contact){
-    if (container.state.status != 'ready'){
+  _call(number){
+
+    if (container.state.status != 'ready') {
       return;
     }
 
-    call = { number: contact.number, type: 'outgoing', date: Date.now, duration: 0 };
+    call = { number: number, type: 'outgoing', date: Date.now, duration: 0 };
 
-    log('call', contact.number);
+    log('call', number);
 
     // InCallManager.start();
     // InCallManager.start({media: 'audio', ringback: '_DEFAULT_'}); // _BUNDLE_ or _DEFAULT_ or _DTMF_
 
     var phone = container.state.phone;
-    var room = container._getRoomId(phone._id, contact.number);
-    socket.emit('call', {to: contact.number, room: room}, function(socketIds){
+    var room = container._getRoomId(phone._id, number);
+    socket.emit('call', {to: number, room: room}, function(socketIds){
       log('socketIds', socketIds);
       for (const i in socketIds) {
         container.createPC(socketIds[i], true);
       }
     });
-    // direct push when server can not push
-    // , function(data){
-    //   container._push(data);
-    // });
-    // container.join(room);
-    container.setState({status: 'outgoing', info: contact.fullName + '\n' + contact.number + '\n calling...'});
+
+    var c = container.state.contacts[number];
+    var info = (c ? c.fullName + '\n' + number : number) + '\n calling...';
+    container.setState({status: 'outgoing', info: info});
   }
 
   _getRoomId(p1, p2){
