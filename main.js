@@ -225,11 +225,11 @@ class MainView extends Component{
     });
 
     socket.on('hangup', function(socketId){
+      slog('hangup');
       call = null;
       for (var socketId in pcPeers) {
         container.leave(socketId);
       }
-      // container.leave(socketId);
       socket.emit('leave');
       container.setState({status: 'ready', info: container.state.phone._id});
     });
@@ -266,15 +266,19 @@ class MainView extends Component{
       // handling pending push notification
       if (pendingnoti){
 
+        var room = pendingnoti.room;
+        var number = pendingnoti.number;
+        pendingnoti = null;
+
         if (call) return;
 
         // try to join room
-        socket.emit('join', pendingnoti.room, function(socketIds){
+        socket.emit('join', room, function(socketIds){
           if (socketIds.length == 0){
             return;
           }
 
-          call = { number: pendingnoti.number, type: 'incoming', date: Date.now, duration: 0 };
+          call = { number: number, type: 'incoming', date: Date.now, duration: 0 };
 
           // ring back to caller
           socket.emit('ringback', call.number);
@@ -288,8 +292,17 @@ class MainView extends Component{
           var info = (c ? c.fullName + '\n' + c.number : c.number) + '\nincoming call...';
           container.setState({status: 'incoming', info: info});
         });
+      }
+    });
 
-        pendingnoti = null;
+    socket.on('disconnect', function(){
+      log('disconnect');
+      if (container.state.status != 'ready') {
+        call = null;
+        for (var socketId in pcPeers) {
+          container.leave(socketId);
+        }
+        container.setState({status: 'ready', info: container.state.phone._id});
       }
     });
 
@@ -320,6 +333,10 @@ class MainView extends Component{
       });
 
     });
+
+    var slog = function(msg, data){
+      socket.emit('log', msg, data);
+    }
   }
 
   _setPhone(phone){
@@ -355,6 +372,10 @@ class MainView extends Component{
   // }
 
   createPC(socketId, isOffer) {
+
+    if (pcPeers[socketId]){
+      return;
+    }
 
     const pc = new RTCPeerConnection(configuration);
     pcPeers[socketId] = pc;
@@ -413,7 +434,6 @@ class MainView extends Component{
       if (container.state.status != 'accept'){
         audioTrack.enabled = false;
       }
-      // InCallManager.stopRingtone();
     };
     pc.onremovestream = function (event) {
       log('onremovestream');
@@ -489,8 +509,6 @@ class MainView extends Component{
   }
 
   leave(socketId) {
-    // InCallManager.stopRingtone();
-    // InCallManager.stop();
     log('leave', socketId);
     if (!pcPeers[socketId]) return;
     pcPeers[socketId].close();
@@ -525,12 +543,13 @@ class MainView extends Component{
 
     log('call', number);
 
-    // InCallManager.start();
     // InCallManager.start({media: 'audio', ringback: '_DEFAULT_'}); // _BUNDLE_ or _DEFAULT_ or _DTMF_
 
     var phone = container.state.phone;
     var room = container._getRoomId(phone._id, number);
     socket.emit('call', {to: number, room: room}, function(socketIds){
+      // if room already existed then
+      // connect to all in room peers
       log('socketIds', socketIds);
       for (const i in socketIds) {
         container.createPC(socketIds[i], true);
@@ -550,7 +569,6 @@ class MainView extends Component{
 
   _hangup(){
     log('hangup');
-    // InCallManager.stop();
     call = null;
     for (var socketId in pcPeers) {
       container.leave(socketId);
