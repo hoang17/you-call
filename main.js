@@ -164,8 +164,9 @@ class MainView extends Component{
         call = { number: number, type: 'incoming', date: Date.now, duration: 0 };
 
         if (status == 'connected'){
+
           // try to join room
-          // slog('noti join');
+          slog('noti join');
           socket.emit('join', room, function(socketIds){
             // slog('noti join socketIds', socketIds);
             if (!socketIds){
@@ -284,6 +285,12 @@ class MainView extends Component{
         return;
       }
 
+      // reset call and peers
+      call = null;
+      for (var socketId in pcPeers) {
+        container.leave(socketId);
+      }
+
       socket.emit('auth', container.state.phone._id, function(phone){
 
         log('auth', phone._id);
@@ -306,8 +313,6 @@ class MainView extends Component{
         }
       });
 
-      call = null;
-
       // handling pending push notification
       if (pendingnoti){
 
@@ -315,14 +320,11 @@ class MainView extends Component{
         var number = pendingnoti.number;
         pendingnoti = null;
 
-        // slog('pendingnoti call', call);
-
-        // if (!call) return;
+        call = { number: number, type: 'incoming', date: Date.now, duration: 0 };
 
         // try to join room
-        // slog('pendignnoti join');
+        slog('pendingnoti join');
         socket.emit('join', room, function(socketIds){
-          // slog('pendingnoti join socketIds', socketIds);
           if (!socketIds){
             return;
           }
@@ -341,20 +343,22 @@ class MainView extends Component{
 
           var c = container.state.contacts[number];
           var info = (c ? c.fullName + '\n' + c.number : c.number) + '\nincoming call...';
-          container.setState({status: 'incoming', info: info});
+          if (container.state.status == 'accept'){
+            container.setState({ info: info });
+          } else {
+            container.setState({status: 'incoming', info: info});
+          }
         });
       }
     });
 
     socket.on('disconnect', function(){
       log('disconnect');
-      if (container.state.status != 'ready') {
-        call = null;
-        for (var socketId in pcPeers) {
-          container.leave(socketId);
-        }
-        container.setState({status: 'ready', info: container.state.phone._id});
+      call = null;
+      for (var socketId in pcPeers) {
+        container.leave(socketId);
       }
+      container.setState({status: 'ready', info: container.state.phone._id});
     });
 
     socket.on('call', function(data) {
@@ -367,7 +371,7 @@ class MainView extends Component{
       call = { number: data.from, type: 'incoming', date: Date.now, duration: 0 };
 
       // try to join room
-      // slog('oncall join');
+      slog('oncall join');
       socket.emit('join', data.room, function(socketIds){
         // slog('oncall join socketIds', socketIds);
         if (!socketIds){
@@ -394,10 +398,6 @@ class MainView extends Component{
       });
 
     });
-
-    var slog = function(msg, data){
-      socket.emit('log', msg, data);
-    }
   }
 
   _setPhone(phone){
@@ -606,9 +606,15 @@ class MainView extends Component{
     socket.emit('call', {to: number, room: room}, function(socketIds){
       // if room already existed then
       // connect to all in room peers
-      log('socketIds', socketIds);
-      for (const i in socketIds) {
-        container.createPC(socketIds[i], true);
+      if (socketIds && socketIds.length > 0){
+        for (const i in socketIds) {
+          container.createPC(socketIds[i], true);
+        }
+        container._accept();
+      }
+      else if (!socketIds){
+        // if alredy joint to room then accept
+        container._accept();
       }
     });
 
@@ -634,6 +640,7 @@ class MainView extends Component{
   }
 
   _accept(){
+
     if (!call){
       return;
     }
@@ -690,6 +697,10 @@ class MainView extends Component{
       </View>
     );
   }
+}
+
+function slog(msg, data){
+  socket.emit('log', msg, data);
 }
 
 function logError(error) {
