@@ -28,6 +28,7 @@ import {
 import OneSignal from 'react-native-onesignal';
 import AddressBook from 'react-native-addressbook'
 import VoipPushNotification from 'react-native-voip-push-notification';
+import PushNotification from 'react-native-push-notification';
 // import InCallManager from 'react-native-incall-manager';
 
 let ContactList = require('./components/ContactList')
@@ -38,6 +39,8 @@ let audioTrack;
 let container;
 let socket;
 let call;
+let calls = [];
+let missedCalls = {};
 
 const configuration = {iceServers: [
   {url:'stun:stun.l.google.com:19302'},
@@ -100,6 +103,16 @@ class MainView extends Component{
       audioTrack = localStream.getTrackById(0);
     });
 
+    AppState.addEventListener("change", (newState) => {
+      if (newState == 'active'){
+        PushNotificationIOS.setApplicationIconBadgeNumber(0);
+        for (var number in missedCalls){
+          missedCalls[number] = [];
+        }
+        AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
+      }
+    });
+
     AsyncStorage.getItem("phone").then((jstring) => {
       var phone = null;
       try{
@@ -108,6 +121,10 @@ class MainView extends Component{
       if (phone && phone._id){
         log('phone', phone._id);
         container._setPhone(phone);
+        if (!phone.missedCalls)
+          phone.missedCalls = missedCalls;
+        else
+          missedCalls = phone.missedCalls;
       }
       else{
         var LoginView = require("./login");
@@ -144,21 +161,20 @@ class MainView extends Component{
       var status = data.status;
 
       if (type == 'call'){
+        if (!missedCalls[number]) missedCalls[number] = [];
+        missedCalls[number].push({ number: number, type: 'incoming', date: Date.now });
+        AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
+        PushNotificationIOS.setApplicationIconBadgeNumber(missedCalls[number].length);
 
         // Show notification
         var c = container.state.contacts[number];
-        VoipPushNotification.presentLocalNotification({
+        PushNotificationIOS.presentLocalNotification({
+        // VoipPushNotification.presentLocalNotification({
           alertBody: (c ? c.fullName : number) + '\nincoming call...',
-          applicationIconBadgeNumber: notification.getBadgeCount(),
           soundName: sound ? sound : 'Marimba.m4r',
           alertAction: 'answer call',
-          userInfo: {number: number}
+          userInfo: {number: number},
         });
-
-        // if (call && AppState.currentState == 'active') return;
-
-        // log('noti call', call);
-        // slog('noti call', call);
 
         if (call) return;
 
@@ -169,7 +185,6 @@ class MainView extends Component{
           // try to join room
           slog('noti join');
           socket.emit('join', room, function(socketIds){
-            // slog('noti join socketIds', socketIds);
             if (!socketIds){
               return;
             }
@@ -177,8 +192,6 @@ class MainView extends Component{
               call = null;
               return;
             }
-
-            // call = { number: number, type: 'incoming', date: Date.now, duration: 0 };
 
             // ring back to caller
             socket.emit('ringback', call.number);
@@ -200,8 +213,6 @@ class MainView extends Component{
 
       }
     });
-
-    var PushNotification = require('react-native-push-notification');
 
     PushNotification.configure({
       // (required) Called when a remote or local
@@ -271,7 +282,23 @@ class MainView extends Component{
 
     socket.on('hangup', function(socketId){
       slog('hangup');
+
+      // PushNotification.cancelLocalNotifications
+      // PushNotificationIOS.cancelLocalNotifications({ number: call.number });
       PushNotificationIOS.cancelAllLocalNotifications();
+
+      AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
+      PushNotificationIOS.setApplicationIconBadgeNumber(missedCalls[call.number].length);
+
+      var c = container.state.contacts[call.number];
+      PushNotificationIOS.presentLocalNotification({
+      // VoipPushNotification.presentLocalNotification({
+        alertBody: (c ? c.fullName : number) + '\nmissed call (' + missedCalls[call.number].length + ')',
+        soundName: '',
+        alertAction: 'call',
+        userInfo: {number: call.number},
+      });
+
       call = null;
       for (var socketId in pcPeers) {
         container.leave(socketId);
@@ -655,6 +682,9 @@ class MainView extends Component{
     // notify caller
     socket.emit('accept', call.number);
     log('accept', audioTrack.enabled);
+
+    calls.push(call);
+    missedCalls[call.number].pop();
   }
 
   _toggleMic(){
