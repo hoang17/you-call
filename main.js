@@ -12,7 +12,6 @@ import {
   KeyboardAvoidingView,
   AsyncStorage,
   AppState,
-  PushNotificationIOS,
 } from 'react-native';
 import io from 'socket.io-client/socket.io';
 import {
@@ -81,8 +80,8 @@ class MainView extends Component{
       device:null,
     };
 
-    socket = io.connect('youcall.io', {transports: ['websocket']});
-    // socket = io.connect('youcall.herokuapp.com', {transports: ['websocket']});
+    // socket = io.connect('youcall.io', {transports: ['websocket']});
+    socket = io.connect('youcall.herokuapp.com', {transports: ['websocket']});
     // socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket']});
 
     // @hoang load turn dynamically
@@ -188,21 +187,49 @@ class MainView extends Component{
       }
     });
 
-    // if waked by local notification
-    PushNotificationIOS.addEventListener('localNotification', (notification) => {
-      if (AppState.currentState == 'background') {
-        if (call){
-          container._accept();
-        }
-        else if (container.state.status == 'ready'){
-          var number = notification.getData().number;
-          if (number){
-            container._call(number);
+    var PushNotification = require('react-native-push-notification');
+
+    PushNotification.configure({
+
+      // (required) Called when a remote or local
+      // notification is opened or received
+      onNotification: function(notification) {
+        // slog(notification);
+        if (notification.userInteraction) {
+          if (call){
+            container._accept();
+          } else if (notification.data.number) {
+            container._call(notification.data.number);
           }
         }
-      }
-    });
+      },
 
+      // (optional) Called when Token is generated (iOS and Android)
+      // onRegister: function(token) {
+      //     console.log( 'TOKEN', token );
+      // },
+
+      // ANDROID ONLY: (optional) GCM Sender ID.
+      // senderID: "YOUR GCM SENDER ID",
+
+      // IOS ONLY (optional): default: all - Permissions to register.
+      // permissions: {
+      //     alert: true,
+      //     badge: true,
+      //     sound: true
+      // },
+
+      // Should the initial notification be popped automatically
+      // default: true
+      // popInitialNotification: true,
+
+      /**
+        * (optional) default: true
+        * - Specified if permissions (ios) and token (android and ios) will requested or not,
+        * - if not, you must call PushNotificationsHandler.requestPermissions() later
+        */
+      // requestPermissions: true,
+    });
 
     socket.on('ringback', function(number){
       if (container.state.status == 'outgoing'){
@@ -591,7 +618,11 @@ class MainView extends Component{
       return;
     }
     audioTrack.enabled = true;
-    container.setState({ status: 'accept' });
+
+    var from = container.state.contacts[number];
+    var name = from ? from.fullName + '\n' + from.number : from.number;
+    container.setState({ status: 'accept', info: name + '\n connected'});
+
     // notify caller
     socket.emit('accept', call.number);
     log('accept', audioTrack.enabled);
