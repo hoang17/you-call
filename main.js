@@ -284,8 +284,8 @@ class MainView extends Component{
       slog('hangup');
 
       // PushNotification.cancelLocalNotifications
-      // PushNotificationIOS.cancelLocalNotifications({ number: call.number });
-      PushNotificationIOS.cancelAllLocalNotifications();
+      PushNotificationIOS.cancelLocalNotifications({ number: call.number });
+      // PushNotificationIOS.cancelAllLocalNotifications();
 
       AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
       PushNotificationIOS.setApplicationIconBadgeNumber(missedCalls[call.number].length);
