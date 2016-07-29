@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   AsyncStorage,
   AppState,
+  PushNotificationIOS,
 } from 'react-native';
 import io from 'socket.io-client/socket.io';
 import {
@@ -63,7 +64,7 @@ const configuration = {iceServers: [
 ]};
 
 // TODO
-let pendingnoti = null;
+let pendingno = null;
 
 class MainView extends Component{
 
@@ -193,8 +194,8 @@ class MainView extends Component{
 
         }
         else {
-          pendingnoti = { number: number, room: room};
-          // slog('pendingnoti', pendingnoti);
+          pendingno = { number: number, room: room};
+          // slog('pendingno', pendingno);
         }
 
       }
@@ -270,6 +271,7 @@ class MainView extends Component{
 
     socket.on('hangup', function(socketId){
       slog('hangup');
+      PushNotificationIOS.cancelAllLocalNotifications();
       call = null;
       for (var socketId in pcPeers) {
         container.leave(socketId);
@@ -314,16 +316,16 @@ class MainView extends Component{
       });
 
       // handling pending push notification
-      if (pendingnoti){
+      if (pendingno){
 
-        var room = pendingnoti.room;
-        var number = pendingnoti.number;
-        pendingnoti = null;
+        var room = pendingno.room;
+        var number = pendingno.number;
+        pendingno = null;
 
         call = { number: number, type: 'incoming', date: Date.now, duration: 0 };
 
         // try to join room
-        slog('pendingnoti join');
+        slog('pendingno join');
         socket.emit('join', room, function(socketIds){
           if (!socketIds){
             return;
