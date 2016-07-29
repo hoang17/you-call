@@ -140,14 +140,9 @@ class MainView extends Component{
       var number = data.from;
       var type = data.type;
       var room = data.room;
+      var status = data.status;
 
       if (type == 'call'){
-
-        // if (AppState.currentState == 'active' || container.state.status != 'incoming') {
-        //   return
-        // }
-
-        if (call) return;
 
         // Show notification
         var c = container.state.contacts[number];
@@ -159,17 +154,29 @@ class MainView extends Component{
           userInfo: {number: number}
         });
 
-        pendingnoti = { number: number, room: room};
+        // if (call && AppState.currentState == 'active') return;
 
-        if (socket.connected){
+        // log('noti call', call);
+        // slog('noti call', call);
 
+        if (call) return;
+
+        call = { number: number, type: 'incoming', date: Date.now, duration: 0 };
+
+        if (status == 'connected'){
           // try to join room
+          // slog('noti join');
           socket.emit('join', room, function(socketIds){
+            // slog('noti join socketIds', socketIds);
+            if (!socketIds){
+              return;
+            }
             if (socketIds.length == 0){
+              call = null;
               return;
             }
 
-            call = { number: number, type: 'incoming', date: Date.now, duration: 0 };
+            // call = { number: number, type: 'incoming', date: Date.now, duration: 0 };
 
             // ring back to caller
             socket.emit('ringback', call.number);
@@ -184,19 +191,24 @@ class MainView extends Component{
           });
 
         }
+        else {
+          pendingnoti = { number: number, room: room};
+          // slog('pendingnoti', pendingnoti);
+        }
+
       }
     });
 
     var PushNotification = require('react-native-push-notification');
 
     PushNotification.configure({
-
       // (required) Called when a remote or local
       // notification is opened or received
       onNotification: function(notification) {
-        // slog(notification);
+        // slog('notification', notification);
+        // slog('call', call);
         if (notification.userInteraction) {
-          if (call){
+          if (call) {
             container._accept();
           } else if (notification.data.number) {
             container._call(notification.data.number);
@@ -301,15 +313,21 @@ class MainView extends Component{
         var number = pendingnoti.number;
         pendingnoti = null;
 
-        if (call) return;
+        // slog('pendingnoti call', call);
+
+        if (!call) return;
 
         // try to join room
+        // slog('pendignnoti join');
         socket.emit('join', room, function(socketIds){
-          if (socketIds.length == 0){
+          // slog('pendingnoti join socketIds', socketIds);
+          if (!socketIds){
             return;
           }
-
-          call = { number: number, type: 'incoming', date: Date.now, duration: 0 };
+          if (socketIds.length == 0){
+            call = null;
+            return;
+          }
 
           // ring back to caller
           socket.emit('ringback', call.number);
@@ -338,17 +356,27 @@ class MainView extends Component{
     });
 
     socket.on('call', function(data) {
+
       log('call', data);
-      if (call != null){
-        return;
-      }
+
+      if (call) return;
+
+
+      call = { number: data.from, type: 'incoming', date: Date.now, duration: 0 };
+
       // try to join room
+      // slog('oncall join');
       socket.emit('join', data.room, function(socketIds){
+        // slog('oncall join socketIds', socketIds);
+        if (!socketIds){
+          return;
+        }
         if (socketIds.length == 0){
+          call = null;
           return;
         }
 
-        call = { number: data.from, type: 'incoming', date: Date.now, duration: 0 };
+        // call = { number: data.from, type: 'incoming', date: Date.now, duration: 0 };
 
         // ring back to caller
         socket.emit('ringback', call.number);
@@ -391,16 +419,6 @@ class MainView extends Component{
       }, logError);
     });
   }
-
-  // join(room) {
-  //   log('join', room);
-  //   socket.emit('join', room, function(socketIds){
-  //     log('socketIds', socketIds);
-  //     for (const i in socketIds) {
-  //       container.createPC(socketIds[i], true);
-  //     }
-  //   });
-  // }
 
   createPC(socketId, isOffer) {
 
@@ -619,7 +637,7 @@ class MainView extends Component{
     }
     audioTrack.enabled = true;
 
-    var from = container.state.contacts[number];
+    var from = container.state.contacts[call.number];
     var name = from ? from.fullName + '\n' + from.number : from.number;
     container.setState({ status: 'accept', info: name + '\n connected'});
 
