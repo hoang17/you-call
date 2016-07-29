@@ -81,8 +81,8 @@ class MainView extends Component{
       device:null,
     };
 
-    // socket = io.connect('youcall.io', {transports: ['websocket']});
-    socket = io.connect('youcall.herokuapp.com', {transports: ['websocket']});
+    socket = io.connect('youcall.io', {transports: ['websocket']});
+    // socket = io.connect('youcall.herokuapp.com', {transports: ['websocket']});
     // socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket']});
 
     // @hoang load turn dynamically
@@ -215,7 +215,11 @@ class MainView extends Component{
     socket.on('accept', function(number){
       if (container.state.status == 'outgoing'){
         audioTrack.enabled = true;
-        container.setState({ status: 'accept' });
+
+        var from = container.state.contacts[number];
+        var name = from ? from.fullName + '\n' + from.number : from.number;
+        container.setState({ status: 'accept', info: name + '\n connected'});
+
         log('accept', audioTrack.enabled);
       }
     });
