@@ -306,6 +306,8 @@ class MainView extends Component{
         }
       });
 
+      call = null;
+
       // handling pending push notification
       if (pendingnoti){
 
@@ -315,7 +317,7 @@ class MainView extends Component{
 
         // slog('pendingnoti call', call);
 
-        if (!call) return;
+        // if (!call) return;
 
         // try to join room
         // slog('pendignnoti join');
@@ -330,14 +332,14 @@ class MainView extends Component{
           }
 
           // ring back to caller
-          socket.emit('ringback', call.number);
+          socket.emit('ringback', number);
 
           // create pc
           for (const i in socketIds) {
             container.createPC(socketIds[i], true);
           }
 
-          var c = container.state.contacts[call.number];
+          var c = container.state.contacts[number];
           var info = (c ? c.fullName + '\n' + c.number : c.number) + '\nincoming call...';
           container.setState({status: 'incoming', info: info});
         });
