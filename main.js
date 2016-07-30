@@ -208,7 +208,6 @@ class MainView extends Component{
         }
         else {
           pendingno = { number: number, room: room};
-          // slog('pendingno', pendingno);
         }
 
       }
