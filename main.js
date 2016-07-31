@@ -85,8 +85,14 @@ class MainView extends Component{
     };
 
     // socket = io.connect('youcall.io', {transports: ['websocket']});
-    socket = io.connect('youcall.herokuapp.com', {transports: ['websocket'] });
-    // socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket']});
+    socket = io.connect('youcall.herokuapp.com', { transports: ['websocket'] });
+
+    // socket = io.connect('http://192.168.100.10:5000', {
+      // transports: ['websocket'],
+      // reconnection: true,
+      // reconnectionDelay: 500,
+      // reconnectionAttempts: 10
+    // });
 
     // @hoang load turn dynamically
     // fetch("https://computeengineondemand.appspot.com/turn?username=iapprtc&key=4080218913", { method: "GET" })
