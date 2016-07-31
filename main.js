@@ -425,6 +425,11 @@ class MainView extends Component{
       });
 
     });
+
+    socket.on("pinging", function(number){
+      log('received ping from', number);
+      slog('received ping from', number);
+    });
   }
 
   _setPhone(phone){
@@ -690,6 +695,15 @@ class MainView extends Component{
     log('mic', audioTrack.enabled);
   }
 
+  _ping(){
+    log('ping');
+    var startTime = Date.now();
+    socket.emit('pinging', function(){
+      var latency = Date.now() - startTime;
+      log('latency', latency);
+    });
+  }
+
   render() {
     return (
       <View style={styles.outerContainer}>
@@ -707,6 +721,12 @@ class MainView extends Component{
                 onPress={this._syncContacts}
                 >
               <Text style={styles.buttonText}>Sync contacts</Text>
+            </TouchableHighlight>
+            <TouchableHighlight style={styles.button}
+                underlayColor='#99d9f4'
+                onPress={this._ping}
+                >
+              <Text style={styles.buttonText}>Ping</Text>
             </TouchableHighlight>
             { this.state.status == 'outgoing' || this.state.status == 'incoming' || this.state.status == 'accept' ?
             <TouchableHighlight style={styles.redbutton}

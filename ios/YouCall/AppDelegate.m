@@ -61,6 +61,11 @@
 //#endif
   
   [Fabric with:@[[Digits class]]];
+  
+  [[UIApplication sharedApplication] setKeepAliveTimeout:600 handler:^{
+    NSLog(@"timeout");
+  }];
+
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
                                                       moduleName:@"YouCall"
