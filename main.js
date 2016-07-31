@@ -85,7 +85,7 @@ class MainView extends Component{
     };
 
     // socket = io.connect('youcall.io', {transports: ['websocket']});
-    socket = io.connect('youcall.herokuapp.com', {transports: ['websocket']});
+    socket = io.connect('youcall.herokuapp.com', {transports: ['websocket'] });
     // socket = io.connect('http://192.168.100.10:5000', {transports: ['websocket']});
 
     // @hoang load turn dynamically
@@ -386,6 +386,8 @@ class MainView extends Component{
         container.leave(socketId);
       }
       container.setState({status: 'ready', info: container.state.phone._id});
+      // try reconnecting
+      socket.io.connect();
     });
 
     socket.on('call', function(data) {
@@ -754,15 +756,14 @@ function slog(msg, data){
 }
 
 function logError(error) {
-  console.log("[YouCall][Error]", error);
+  console.log('error', error);
 }
 
 function log(msg, data) {
-  if (data){
-    console.log('[YouCall]['+msg+']', data);
-  } else {
-    console.log('[YouCall]['+msg+']');
-  }
+  if (data)
+    console.log(msg, data);
+  else
+    console.log(msg);
 }
 
 const styles = StyleSheet.create({
