@@ -107,11 +107,13 @@ class MainView extends Component{
 
     AppState.addEventListener("change", (newState) => {
       if (newState == 'active'){
-        PushNotificationIOS.setApplicationIconBadgeNumber(0);
-        for (var number in missedCalls){
-          missedCalls[number] = [];
+        if (!call){
+          PushNotificationIOS.setApplicationIconBadgeNumber(0);
+          for (var number in missedCalls){
+            missedCalls[number] = [];
+          }
+          AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
         }
-        AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
       }
     });
 
@@ -226,6 +228,11 @@ class MainView extends Component{
           if (call) {
             container._accept();
           } else if (notification.data.number) {
+            PushNotificationIOS.setApplicationIconBadgeNumber(0);
+            for (var number in missedCalls){
+              missedCalls[number] = [];
+            }
+            AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
             container._call(notification.data.number);
           }
         }
@@ -287,24 +294,25 @@ class MainView extends Component{
 
       // container.setState({modalVisible: false});
 
-      // PushNotification.cancelLocalNotifications
       // PushNotificationIOS.cancelLocalNotifications({ number: call.number });
       PushNotificationIOS.cancelAllLocalNotifications();
-
-      if (missedCalls[call.number]){
-        AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
-        PushNotificationIOS.setApplicationIconBadgeNumber(missedCalls[call.number].length);
-
-        if (missedCalls[call.number].length > 0){
-          var c = container.state.contacts[call.number];
-          PushNotificationIOS.presentLocalNotification({
-            alertBody: (c ? c.fullName : call.number) + '\nmissed call (' + missedCalls[call.number].length + ')',
-            soundName: 'default',
-            alertAction: 'call',
-            userInfo: {number: call.number},
-          });
+      var badgeCount = 0;
+      if (missedCalls){
+        for (var number in missedCalls){
+          var length = missedCalls[number].length;
+          if (length > 0){
+            badgeCount++;
+            var c = container.state.contacts[number];
+            PushNotificationIOS.presentLocalNotification({
+              alertBody: (c ? c.fullName : number) + (length > 1 ? '\nmissed calls (' + length + ')' : '\nmissed call'),
+              soundName: 'default',
+              alertAction: 'call',
+              userInfo: {number: number},
+            });
+          }
         }
-
+        AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
+        PushNotificationIOS.setApplicationIconBadgeNumber(badgeCount);
       }
 
       call = null;

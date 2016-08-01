@@ -19,7 +19,7 @@ module.exports = React.createClass({
       <ScrollView>
         {keys.map((key) => {
           var contact = this.props.contacts[key];
-          contact.fullName = [contact.firstName, , contact.middleName, contact.lastName].join(' ').trim();
+          if (!contact.fullName) contact.fullName = [contact.firstName, , contact.middleName, contact.lastName].join(' ').trim();
           return (
             <View style={{padding:5}} key={key}>
               <TouchableHighlight
@@ -27,7 +27,7 @@ module.exports = React.createClass({
                 underlayColor='#99d9f4'
                 onPress={this.props.callback.bind(this, key)}
                 >
-                <Text style={styles.buttonText}>{contact.fullName} ({contact.number.substr(contact.number.length-4)})</Text>
+                <Text style={styles.buttonText}>{contact.fullName}</Text>
               </TouchableHighlight>
             </View>
           )
