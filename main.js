@@ -168,7 +168,7 @@ class MainView extends Component{
 
       log('notification', notification);
 
-      var sound = notification.getSound();
+      // var sound = notification.getSound();
       var data = notification.getData();
       var number = data.from;
       var type = data.type;
@@ -180,15 +180,6 @@ class MainView extends Component{
         missedCalls[number].push({ number: number, type: 'incoming', date: Date.now });
         AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
         PushNotificationIOS.setApplicationIconBadgeNumber(missedCalls[number].length);
-
-        // Show notification
-        var c = container.state.contacts[number];
-        PushNotificationIOS.presentLocalNotification({
-          alertBody: (c ? c.fullName : number) + '\nincoming call...',
-          soundName: sound ? sound : 'Marimba.m4r',
-          alertAction: 'answer call',
-          userInfo: {number: number},
-        });
 
         if (call) return;
 
@@ -207,7 +198,14 @@ class MainView extends Component{
               return;
             }
 
-            // container.setState({modalVisible: true});
+            // Show notification
+            var c = container.state.contacts[number];
+            PushNotificationIOS.presentLocalNotification({
+              alertBody: (c ? c.fullName : number) + '\nincoming call...',
+              soundName: 'Marimba.m4r',
+              alertAction: 'answer call',
+              userInfo: {number: number},
+            });
 
             // ring back to caller
             socket.emit('ringback', call.number);
@@ -393,7 +391,14 @@ class MainView extends Component{
             return;
           }
 
-          // container.setState({modalVisible: true});
+          // Show notification
+          var c = container.state.contacts[number];
+          PushNotificationIOS.presentLocalNotification({
+            alertBody: (c ? c.fullName : number) + '\nincoming call...',
+            soundName: 'Marimba.m4r',
+            alertAction: 'answer call',
+            userInfo: {number: number},
+          });
 
           // ring back to caller
           socket.emit('ringback', number);
@@ -403,7 +408,7 @@ class MainView extends Component{
             container.createPC(socketIds[i], true);
           }
 
-          var c = container.state.contacts[number];
+          // var c = container.state.contacts[number];
           var info = (c ? c.fullName + '\n' + c.number : c.number) + '\nincoming call...';
           if (container.state.status == 'accept'){
             container.setState({ modalVisible: true, info: info });
