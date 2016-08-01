@@ -2,6 +2,7 @@
 
 import React, { Component } from 'react';
 import {
+  Modal,
   AppRegistry,
   StyleSheet,
   Text,
@@ -25,7 +26,7 @@ import {
   getUserMedia,
 } from 'react-native-webrtc';
 
-import OneSignal from 'react-native-onesignal';
+import Button from 'apsl-react-native-button'
 import AddressBook from 'react-native-addressbook'
 import VoipPushNotification from 'react-native-voip-push-notification';
 import PushNotification from 'react-native-push-notification';
@@ -82,17 +83,12 @@ class MainView extends Component{
       contacts:[],
       phone:null,
       device:null,
+      modalVisible: false,
     };
 
     // socket = io.connect('youcall.io', {transports: ['websocket']});
     socket = io.connect('youcall.herokuapp.com', { transports: ['websocket'] });
-
-    // socket = io.connect('http://192.168.100.10:5000', {
-      // transports: ['websocket'],
-      // reconnection: true,
-      // reconnectionDelay: 500,
-      // reconnectionAttempts: 10
-    // });
+    // socket = io.connect('http://192.168.100.10:5000', { transports: ['websocket'] });
 
     // @hoang load turn dynamically
     // fetch("https://computeengineondemand.appspot.com/turn?username=iapprtc&key=4080218913", { method: "GET" })
@@ -141,7 +137,6 @@ class MainView extends Component{
         });
       }
     }).done();
-
 
     VoipPushNotification.requestPermissions();
 
@@ -199,6 +194,8 @@ class MainView extends Component{
               return;
             }
 
+            // container.setState({modalVisible: true});
+
             // ring back to caller
             socket.emit('ringback', call.number);
 
@@ -208,7 +205,7 @@ class MainView extends Component{
             }
 
             var info = (c ? c.fullName + '\n' + c.number : c.number) + '\nincoming call...';
-            container.setState({status: 'incoming', info: info});
+            container.setState({modalVisible: true, status: 'incoming', info: info});
           });
 
         }
@@ -229,7 +226,7 @@ class MainView extends Component{
           if (call) {
             container._accept();
           } else if (notification.data.number) {
-            container._call(notification.data.number);
+            // container._call(notification.data.number);
           }
         }
       },
@@ -288,27 +285,34 @@ class MainView extends Component{
     socket.on('hangup', function(socketId){
       slog('hangup');
 
+      // container.setState({modalVisible: false});
+
       // PushNotification.cancelLocalNotifications
       // PushNotificationIOS.cancelLocalNotifications({ number: call.number });
       PushNotificationIOS.cancelAllLocalNotifications();
 
-      AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
-      PushNotificationIOS.setApplicationIconBadgeNumber(missedCalls[call.number].length);
+      if (missedCalls[call.number]){
+        AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
+        PushNotificationIOS.setApplicationIconBadgeNumber(missedCalls[call.number].length);
 
-      var c = container.state.contacts[call.number];
-      PushNotificationIOS.presentLocalNotification({
-        alertBody: (c ? c.fullName : call.number) + '\nmissed call (' + missedCalls[call.number].length + ')',
-        soundName: 'default',
-        alertAction: 'call',
-        userInfo: {number: call.number},
-      });
+        if (missedCalls[call.number].length > 0){
+          var c = container.state.contacts[call.number];
+          PushNotificationIOS.presentLocalNotification({
+            alertBody: (c ? c.fullName : call.number) + '\nmissed call (' + missedCalls[call.number].length + ')',
+            soundName: 'default',
+            alertAction: 'call',
+            userInfo: {number: call.number},
+          });
+        }
+
+      }
 
       call = null;
       for (var socketId in pcPeers) {
         container.leave(socketId);
       }
       socket.emit('leave');
-      container.setState({status: 'ready', info: container.state.phone._id});
+      container.setState({modalVisible: false, status: 'ready', info: container.state.phone._id});
     });
 
     socket.on('connect', function() {
@@ -317,6 +321,8 @@ class MainView extends Component{
       if (!container.state.phone){
         return;
       }
+
+      // container.setState({modalVisible: false});
 
       // reset call and peers
       call = null;
@@ -366,6 +372,8 @@ class MainView extends Component{
             return;
           }
 
+          // container.setState({modalVisible: true});
+
           // ring back to caller
           socket.emit('ringback', number);
 
@@ -377,9 +385,9 @@ class MainView extends Component{
           var c = container.state.contacts[number];
           var info = (c ? c.fullName + '\n' + c.number : c.number) + '\nincoming call...';
           if (container.state.status == 'accept'){
-            container.setState({ info: info });
+            container.setState({ modalVisible: true, info: info });
           } else {
-            container.setState({status: 'incoming', info: info});
+            container.setState({modalVisible: true, status: 'incoming', info: info});
           }
         });
       }
@@ -387,13 +395,14 @@ class MainView extends Component{
 
     socket.on('disconnect', function(){
       log('disconnect');
+
       call = null;
       for (var socketId in pcPeers) {
         container.leave(socketId);
       }
-      container.setState({status: 'ready', info: container.state.phone._id});
+      container.setState({modalVisible: false, status: 'ready', info: container.state.phone._id});
       // try reconnecting
-      socket.io.connect();
+      // socket.io.connect();
     });
 
     socket.on('call', function(data) {
@@ -401,7 +410,6 @@ class MainView extends Component{
       log('call', data);
 
       if (call) return;
-
 
       call = { number: data.from, type: 'incoming', date: Date.now, duration: 0 };
 
@@ -417,8 +425,6 @@ class MainView extends Component{
           return;
         }
 
-        // call = { number: data.from, type: 'incoming', date: Date.now, duration: 0 };
-
         // ring back to caller
         socket.emit('ringback', call.number);
 
@@ -429,7 +435,7 @@ class MainView extends Component{
 
         var from = container.state.contacts[call.number];
         var name = from ? from.fullName + '\n' + from.number : from.number;
-        container.setState({status: 'incoming', info: name + '\n incoming call...'});
+        container.setState({modalVisible: true, status: 'incoming', info: name + '\n incoming call...'});
       });
 
     });
@@ -438,6 +444,11 @@ class MainView extends Component{
       log('received ping from', number);
       slog('received ping from', number);
     });
+
+    // socket.on("ping", function(callback){
+    //   var number = container.state.phone ? container.state.phone._id : 'empty number';
+    //   callback(number);
+    // });
   }
 
   _setPhone(phone){
@@ -635,6 +646,8 @@ class MainView extends Component{
       return;
     }
 
+    // container.setState({modalVisible: true});
+
     call = { number: number, type: 'outgoing', date: Date.now, duration: 0 };
 
     log('call', number);
@@ -660,7 +673,7 @@ class MainView extends Component{
 
     var c = container.state.contacts[number];
     var info = (c ? c.fullName + '\n' + number : number) + '\n calling...';
-    container.setState({status: 'outgoing', info: info});
+    container.setState({modalVisible: true, status: 'outgoing', info: info});
   }
 
   _getRoomId(p1, p2){
@@ -671,12 +684,15 @@ class MainView extends Component{
 
   _hangup(){
     log('hangup');
+
+    // container.setState({modalVisible: false});
+
     call = null;
     for (var socketId in pcPeers) {
       container.leave(socketId);
     }
     socket.emit('hangup');
-    container.setState({status: 'ready', info: container.state.phone._id});
+    container.setState({modalVisible: false, status: 'ready', info: container.state.phone._id});
   }
 
   _accept(){
@@ -730,7 +746,7 @@ class MainView extends Component{
                 >
               <Text style={styles.buttonText}>Sync contacts</Text>
             </TouchableHighlight>
-            <TouchableHighlight style={styles.button}
+            {/*<TouchableHighlight style={styles.button}
                 underlayColor='#99d9f4'
                 onPress={this._ping}
                 >
@@ -749,9 +765,35 @@ class MainView extends Component{
                 onPress={this._accept}
                 >
               <Text style={styles.buttonText}>Accept</Text>
-            </TouchableHighlight> : null }
+            </TouchableHighlight> : null }*/}
           </View>
         </KeyboardAvoidingView> : null }
+        <Modal
+          animationType='slide'
+          transparent={false}
+          visible={this.state.modalVisible}
+          //onRequestClose={() => {this._setModalVisible(false)}}
+          >
+          <View style={[styles.container, { backgroundColor: '#f5fcff' }]}>
+            <View style={[styles.innerContainer]}>
+              <Text style={styles.description}>{this.state.info}</Text>
+              { this.state.status == 'incoming' ?
+              <Button
+                onPress={this._accept}
+                style={styles.buttonStyle4}
+                textStyle={styles.textStyle}>
+                Accept
+              </Button> : null }
+              { this.state.status == 'outgoing' || this.state.status == 'incoming' || this.state.status == 'accept' ?
+              <Button
+                onPress={this._hangup}
+                style={styles.buttonStyle2}
+                textStyle={styles.textStyle}>
+                Hangup
+              </Button>: null }
+            </View>
+          </View>
+        </Modal>
       </View>
     );
   }
@@ -841,6 +883,71 @@ const styles = StyleSheet.create({
 	  alignSelf: 'stretch',
 	  justifyContent: 'center'
 	},
+
+  textStyle: {
+    color: 'white'
+  },
+  textStyle6: {
+    color: '#8e44ad',
+    fontFamily: 'Avenir',
+    fontWeight: 'bold'
+  },
+  buttonStylePressing: {
+    borderColor: 'red',
+    backgroundColor: 'red'
+  },
+  buttonStyle: {
+    borderColor: '#f39c12',
+    backgroundColor: '#f1c40f'
+  },
+  buttonStyle1: {
+    borderColor: '#d35400',
+    backgroundColor: '#e98b39'
+  },
+  buttonStyle2: {
+    borderColor: '#c0392b',
+    backgroundColor: '#e74c3c'
+  },
+  buttonStyle3: {
+    borderColor: '#16a085',
+    backgroundColor: '#1abc9c'
+  },
+  buttonStyle4: {
+    borderColor: '#27ae60',
+    backgroundColor: '#2ecc71'
+  },
+  buttonStyle5: {
+    borderColor: '#2980b9',
+    backgroundColor: '#3498db'
+  },
+  buttonStyle6: {
+    borderColor: '#8e44ad',
+    backgroundColor: '#9b59b6'
+  },
+  buttonStyle7: {
+    borderColor: '#8e44ad',
+    backgroundColor: 'white',
+    borderRadius: 0,
+    borderWidth: 3,
+  },
+  buttonStyle8: {
+    backgroundColor: 'white',
+    borderColor: '#333',
+    borderWidth: 2,
+    borderRadius: 22,
+  },
+  textStyle8: {
+    fontFamily: 'Avenir Next',
+    fontWeight: '500',
+    color: '#333',
+  },
+  customViewStyle: {
+    width: 120,
+    height: 40,
+    alignItems: 'center',
+    flexDirection: 'row',
+  }
+
 });
 
 module.exports = MainView
