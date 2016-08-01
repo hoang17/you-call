@@ -226,7 +226,7 @@ class MainView extends Component{
           if (call) {
             container._accept();
           } else if (notification.data.number) {
-            // container._call(notification.data.number);
+            container._call(notification.data.number);
           }
         }
       },
