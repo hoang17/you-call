@@ -451,6 +451,15 @@ class MainView extends Component{
           return;
         }
 
+        // Show notification
+        var c = container.state.contacts[call.number];
+        PushNotificationIOS.presentLocalNotification({
+          alertBody: (c ? c.fullName : call.number) + '\nincoming call...',
+          soundName: 'Marimba.m4r',
+          alertAction: 'answer call',
+          userInfo: {number: call.number},
+        });
+
         if (AppState.currentState == 'active'){
           ringtone.play();
         }
@@ -463,8 +472,7 @@ class MainView extends Component{
           container.createPC(socketIds[i], true);
         }
 
-        var from = container.state.contacts[call.number];
-        var name = from ? from.fullName + '\n' + from.number : from.number;
+        var name = c ? c.fullName + '\n' + c.number : c.number;
         container.setState({modalVisible: true, status: 'incoming', info: name + '\n incoming call...'});
       });
 
