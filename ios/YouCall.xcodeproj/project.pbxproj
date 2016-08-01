@@ -18,6 +18,8 @@
 		139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 139FDEF41B06529B00C62182 /* libRCTWebSocket.a */; };
 		146834051AC3E58100842450 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
 		370C81481D3E04DE00269221 /* libRCTAddressBook.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 370C813A1D3E04A800269221 /* libRCTAddressBook.a */; };
+		371068B11D4F595500BDFC42 /* libRNSound.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 371068B01D4F593700BDFC42 /* libRNSound.a */; };
+		371068B31D4F5D9B00BDFC42 /* ringback.wav in Resources */ = {isa = PBXBuildFile; fileRef = 371068B21D4F5D9B00BDFC42 /* ringback.wav */; };
 		372C189A1D3BE599000A5510 /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 372C18961D3BE599000A5510 /* Fabric.framework */; };
 		372C189B1D3BE599000A5510 /* DigitsKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 372C18971D3BE599000A5510 /* DigitsKit.framework */; };
 		372C189C1D3BE599000A5510 /* DigitsKitResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 372C18981D3BE599000A5510 /* DigitsKitResources.bundle */; };
@@ -118,6 +120,13 @@
 			remoteGlobalIDString = 145CC57B1AED80100006342E;
 			remoteInfo = RCTAddressBookTests;
 		};
+		371068AF1D4F593700BDFC42 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 371068AB1D4F593700BDFC42 /* RNSound.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 19825A1E1BD4A89800EE0337;
+			remoteInfo = RNSound;
+		};
 		372C18A21D3BE65C000A5510 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 372C189E1D3BE65C000A5510 /* RCTDigitsManager.xcodeproj */;
@@ -181,6 +190,8 @@
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
 		31934452127181B9001E1D2A /* Pods-YouCall.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-YouCall.debug.xcconfig"; path = "Pods/Target Support Files/Pods-YouCall/Pods-YouCall.debug.xcconfig"; sourceTree = "<group>"; };
 		370C81321D3E04A800269221 /* RCTAddressBook.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTAddressBook.xcodeproj; path = "../node_modules/react-native-addressbook/RCTAddressBook.xcodeproj"; sourceTree = "<group>"; };
+		371068AB1D4F593700BDFC42 /* RNSound.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNSound.xcodeproj; path = "../node_modules/react-native-sound/RNSound.xcodeproj"; sourceTree = "<group>"; };
+		371068B21D4F5D9B00BDFC42 /* ringback.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ringback.wav; sourceTree = "<group>"; };
 		372C18961D3BE599000A5510 /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fabric.framework; sourceTree = "<group>"; };
 		372C18971D3BE599000A5510 /* DigitsKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DigitsKit.framework; sourceTree = "<group>"; };
 		372C18981D3BE599000A5510 /* DigitsKitResources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = DigitsKitResources.bundle; path = DigitsKit.framework/Versions/A/Resources/DigitsKitResources.bundle; sourceTree = "<group>"; };
@@ -255,6 +266,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				371068B11D4F595500BDFC42 /* libRNSound.a in Frameworks */,
 				3798903F1D47F1EE00A91134 /* libRCTPushNotification.a in Frameworks */,
 				379CB2931D450268003A3170 /* libRNVoipPushNotification.a in Frameworks */,
 				370C81481D3E04DE00269221 /* libRCTAddressBook.a in Frameworks */,
@@ -358,6 +370,7 @@
 				3747666B1D40064D009F6E53 /* AppDelegate.h */,
 				374766691D40064D009F6E53 /* AppDelegate.m */,
 				3747666C1D40064D009F6E53 /* Images.xcassets */,
+				371068B21D4F5D9B00BDFC42 /* ringback.wav */,
 				379CB2941D454DC4003A3170 /* Marimba.m4r */,
 				374766841D4006C4009F6E53 /* LaunchScreen.xib */,
 			);
@@ -377,6 +390,14 @@
 			children = (
 				370C813A1D3E04A800269221 /* libRCTAddressBook.a */,
 				370C813C1D3E04A800269221 /* RCTAddressBookTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		371068AC1D4F593700BDFC42 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				371068B01D4F593700BDFC42 /* libRNSound.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -444,6 +465,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				371068AB1D4F593700BDFC42 /* RNSound.xcodeproj */,
 				379890391D47F1D900A91134 /* RCTPushNotification.xcodeproj */,
 				379CB27D1D450254003A3170 /* RNVoipPushNotification.xcodeproj */,
 				370C81321D3E04A800269221 /* RCTAddressBook.xcodeproj */,
@@ -690,6 +712,10 @@
 					ProjectRef = 146833FF1AC3E56700842450 /* React.xcodeproj */;
 				},
 				{
+					ProductGroup = 371068AC1D4F593700BDFC42 /* Products */;
+					ProjectRef = 371068AB1D4F593700BDFC42 /* RNSound.xcodeproj */;
+				},
+				{
 					ProductGroup = 379CB27E1D450254003A3170 /* Products */;
 					ProjectRef = 379CB27D1D450254003A3170 /* RNVoipPushNotification.xcodeproj */;
 				},
@@ -772,6 +798,13 @@
 			remoteRef = 370C813B1D3E04A800269221 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		371068B01D4F593700BDFC42 /* libRNSound.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNSound.a;
+			remoteRef = 371068AF1D4F593700BDFC42 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		372C18A31D3BE65C000A5510 /* libRCTDigitsManager.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -830,6 +863,7 @@
 			files = (
 				374766861D4006C4009F6E53 /* LaunchScreen.xib in Resources */,
 				379CB2951D454DC4003A3170 /* Marimba.m4r in Resources */,
+				371068B31D4F5D9B00BDFC42 /* ringback.wav in Resources */,
 				372C189C1D3BE599000A5510 /* DigitsKitResources.bundle in Resources */,
 				374766701D40064D009F6E53 /* Images.xcassets in Resources */,
 			);

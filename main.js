@@ -32,6 +32,8 @@ import VoipPushNotification from 'react-native-voip-push-notification';
 import PushNotification from 'react-native-push-notification';
 // import InCallManager from 'react-native-incall-manager';
 
+var Sound = require('react-native-sound');
+
 let ContactList = require('./components/ContactList')
 
 const pcPeers = {};
@@ -69,6 +71,16 @@ const configuration = {iceServers: [
 
 // TODO
 let pendingno = null;
+
+var ringtone = new Sound('Marimba.m4r', Sound.MAIN_BUNDLE);
+var ringbacktone = new Sound('ringback.wav', Sound.MAIN_BUNDLE);
+// ringbacktone.setCategory('PlayAndRecord');
+// var ringbacktone = new Sound('/Library/Ringtones/Signal.m4r');
+
+ringtone.setNumberOfLoops(10);
+ringbacktone.setNumberOfLoops(10);
+// ringtone.enableInSilenceMode(false);
+// ringbacktone.enableInSilenceMode(true);
 
 class MainView extends Component{
 
@@ -172,7 +184,6 @@ class MainView extends Component{
         // Show notification
         var c = container.state.contacts[number];
         PushNotificationIOS.presentLocalNotification({
-        // VoipPushNotification.presentLocalNotification({
           alertBody: (c ? c.fullName : number) + '\nincoming call...',
           soundName: sound ? sound : 'Marimba.m4r',
           alertAction: 'answer call',
@@ -291,6 +302,8 @@ class MainView extends Component{
 
     socket.on('hangup', function(socketId){
       slog('hangup');
+
+      ringtone.stop();
 
       // container.setState({modalVisible: false});
 
@@ -433,6 +446,10 @@ class MainView extends Component{
           return;
         }
 
+        if (AppState.currentState == 'active'){
+          ringtone.play();
+        }
+
         // ring back to caller
         socket.emit('ringback', call.number);
 
@@ -520,14 +537,25 @@ class MainView extends Component{
 
       if (event.target.iceConnectionState === 'connected') {
         if (call){
-          var from = container.state.contacts[call.number];
-          var name = from ? from.fullName + '\n' + from.number : from.number;
+          var c = container.state.contacts[call.number];
+          var name = c ? c.fullName + '\n' + c.number : c.number;
           if (container.state.status == 'outgoing'){
             container.setState({ info: name + '\n waiting for accept...'});
           }
           else if (container.state.status == 'accept'){
             container.setState({ info: name + '\n connected'});
           }
+
+          // if (container.state.status == 'incoming'){
+          //   // Show notification
+          //   PushNotificationIOS.presentLocalNotification({
+          //   // VoipPushNotification.presentLocalNotification({
+          //     alertBody: (c ? c.fullName : c.number) + '\nincoming call...',
+          //     soundName: 'Marimba.m4r',
+          //     alertAction: 'answer call',
+          //     userInfo: {number: c.number},
+          //   });
+          // }
         }
         // container.setState({info: 'Peer connected'});
         // createDataChannel();
@@ -654,6 +682,8 @@ class MainView extends Component{
       return;
     }
 
+    ringbacktone.play();
+
     // container.setState({modalVisible: true});
 
     call = { number: number, type: 'outgoing', date: Date.now, duration: 0 };
@@ -693,6 +723,9 @@ class MainView extends Component{
   _hangup(){
     log('hangup');
 
+    ringtone.stop();
+    ringbacktone.stop();
+
     // container.setState({modalVisible: false});
 
     call = null;
@@ -708,6 +741,10 @@ class MainView extends Component{
     if (!call){
       return;
     }
+
+    ringtone.stop();
+    ringbacktone.stop();
+
     audioTrack.enabled = true;
 
     var from = container.state.contacts[call.number];
