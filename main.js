@@ -178,12 +178,19 @@ class MainView extends Component{
       if (type == 'call'){
         if (!missedCalls[number]) missedCalls[number] = [];
         missedCalls[number].push({ number: number, type: 'incoming', date: Date.now });
-        AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
-        PushNotificationIOS.setApplicationIconBadgeNumber(missedCalls[number].length);
 
         if (call) return;
 
         call = { number: number, type: 'incoming', date: Date.now, duration: 0 };
+
+        // Show notification
+        var c = container.state.contacts[number];
+        PushNotificationIOS.presentLocalNotification({
+          alertBody: (c ? c.fullName : number) + '\nincoming call...',
+          soundName: 'Marimba.m4r',
+          alertAction: 'answer call',
+          userInfo: {number: number},
+        });
 
         if (status == 'connected'){
 
@@ -195,17 +202,28 @@ class MainView extends Component{
             }
             if (socketIds.length == 0){
               call = null;
+              // missed calls
+              PushNotificationIOS.cancelAllLocalNotifications();
+              var badgeCount = 0;
+              if (missedCalls){
+                for (var number in missedCalls){
+                  var length = missedCalls[number].length;
+                  if (length > 0){
+                    badgeCount++;
+                    var c = container.state.contacts[number];
+                    PushNotificationIOS.presentLocalNotification({
+                      alertBody: (c ? c.fullName : number) + (length > 1 ? '\nmissed calls (' + length + ')' : '\nmissed call'),
+                      soundName: 'default',
+                      alertAction: 'call',
+                      userInfo: {number: number},
+                    });
+                  }
+                }
+                AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
+                PushNotificationIOS.setApplicationIconBadgeNumber(badgeCount);
+              }
               return;
             }
-
-            // Show notification
-            var c = container.state.contacts[number];
-            PushNotificationIOS.presentLocalNotification({
-              alertBody: (c ? c.fullName : number) + '\nincoming call...',
-              soundName: 'Marimba.m4r',
-              alertAction: 'answer call',
-              userInfo: {number: number},
-            });
 
             // ring back to caller
             socket.emit('ringback', call.number);
@@ -215,7 +233,7 @@ class MainView extends Component{
               container.createPC(socketIds[i], true);
             }
 
-            var info = (c ? c.fullName + '\n' + c.number : c.number) + '\nincoming call...';
+            var info = (c ? c.fullName + '\n' + c.number : call.number) + '\nincoming call...';
             container.setState({modalVisible: true, status: 'incoming', info: info});
           });
 
@@ -383,22 +401,45 @@ class MainView extends Component{
         // try to join room
         slog('pendingno join');
         socket.emit('join', room, function(socketIds){
+
           if (!socketIds){
             return;
           }
           if (socketIds.length == 0){
             call = null;
+            // missed calls
+            var c = container.state.contacts[number];
+            PushNotificationIOS.cancelAllLocalNotifications();
+            var badgeCount = 0;
+            if (missedCalls){
+              for (var n in missedCalls){
+                var length = missedCalls[n].length;
+                if (length > 0){
+                  badgeCount++;
+                  var c = container.state.contacts[n];
+                  PushNotificationIOS.presentLocalNotification({
+                    alertBody: (c ? c.fullName : n) + (length > 1 ? '\nmissed calls (' + length + ')' : '\nmissed call'),
+                    soundName: 'default',
+                    alertAction: 'call',
+                    userInfo: {number: n},
+                  });
+                }
+              }
+              AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
+              PushNotificationIOS.setApplicationIconBadgeNumber(badgeCount);
+            }
+
             return;
           }
 
-          // Show notification
-          var c = container.state.contacts[number];
-          PushNotificationIOS.presentLocalNotification({
-            alertBody: (c ? c.fullName : number) + '\nincoming call...',
-            soundName: 'Marimba.m4r',
-            alertAction: 'answer call',
-            userInfo: {number: number},
-          });
+          // // Show notification
+          // var c = container.state.contacts[number];
+          // PushNotificationIOS.presentLocalNotification({
+          //   alertBody: (c ? c.fullName : number) + '\nincoming call...',
+          //   soundName: 'Marimba.m4r',
+          //   alertAction: 'answer call',
+          //   userInfo: {number: number},
+          // });
 
           // ring back to caller
           socket.emit('ringback', number);
@@ -408,8 +449,8 @@ class MainView extends Component{
             container.createPC(socketIds[i], true);
           }
 
-          // var c = container.state.contacts[number];
-          var info = (c ? c.fullName + '\n' + c.number : c.number) + '\nincoming call...';
+          var c = container.state.contacts[number];
+          var info = (c ? c.fullName + '\n' + c.number : number) + '\nincoming call...';
           if (container.state.status == 'accept'){
             container.setState({ modalVisible: true, info: info });
           } else {
@@ -439,6 +480,15 @@ class MainView extends Component{
 
       call = { number: data.from, type: 'incoming', date: Date.now, duration: 0 };
 
+      // Show notification
+      var c = container.state.contacts[call.number];
+      PushNotificationIOS.presentLocalNotification({
+        alertBody: (c ? c.fullName : call.number) + '\nincoming call...',
+        soundName: 'Marimba.m4r',
+        alertAction: 'answer call',
+        userInfo: {number: call.number},
+      });
+
       // try to join room
       slog('oncall join');
       socket.emit('join', data.room, function(socketIds){
@@ -448,17 +498,28 @@ class MainView extends Component{
         }
         if (socketIds.length == 0){
           call = null;
+          // missed calls
+          PushNotificationIOS.cancelAllLocalNotifications();
+          var badgeCount = 0;
+          if (missedCalls){
+            for (var number in missedCalls){
+              var length = missedCalls[number].length;
+              if (length > 0){
+                badgeCount++;
+                var c = container.state.contacts[number];
+                PushNotificationIOS.presentLocalNotification({
+                  alertBody: (c ? c.fullName : number) + (length > 1 ? '\nmissed calls (' + length + ')' : '\nmissed call'),
+                  soundName: 'default',
+                  alertAction: 'call',
+                  userInfo: {number: number},
+                });
+              }
+            }
+            AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
+            PushNotificationIOS.setApplicationIconBadgeNumber(badgeCount);
+          }
           return;
         }
-
-        // Show notification
-        var c = container.state.contacts[call.number];
-        PushNotificationIOS.presentLocalNotification({
-          alertBody: (c ? c.fullName : call.number) + '\nincoming call...',
-          soundName: 'Marimba.m4r',
-          alertAction: 'answer call',
-          userInfo: {number: call.number},
-        });
 
         if (AppState.currentState == 'active'){
           ringtone.play();
@@ -472,7 +533,8 @@ class MainView extends Component{
           container.createPC(socketIds[i], true);
         }
 
-        var name = c ? c.fullName + '\n' + c.number : c.number;
+        var c = container.state.contacts[call.number];
+        var name = c ? c.fullName + '\n' + c.number : call.number;
         container.setState({modalVisible: true, status: 'incoming', info: name + '\n incoming call...'});
       });
 
@@ -551,7 +613,7 @@ class MainView extends Component{
       if (event.target.iceConnectionState === 'connected') {
         if (call){
           var c = container.state.contacts[call.number];
-          var name = c ? c.fullName + '\n' + c.number : c.number;
+          var name = c ? c.fullName + '\n' + c.number : call.number;
           if (container.state.status == 'outgoing'){
             container.setState({ info: name + '\n waiting for accept...'});
           }
