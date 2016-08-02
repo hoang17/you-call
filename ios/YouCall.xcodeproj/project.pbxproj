@@ -20,6 +20,7 @@
 		370C81481D3E04DE00269221 /* libRCTAddressBook.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 370C813A1D3E04A800269221 /* libRCTAddressBook.a */; };
 		371068B11D4F595500BDFC42 /* libRNSound.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 371068B01D4F593700BDFC42 /* libRNSound.a */; };
 		371068B31D4F5D9B00BDFC42 /* ringback.wav in Resources */ = {isa = PBXBuildFile; fileRef = 371068B21D4F5D9B00BDFC42 /* ringback.wav */; };
+		371068C61D50B1EE00BDFC42 /* youcall.png in Resources */ = {isa = PBXBuildFile; fileRef = 371068C51D50B1EE00BDFC42 /* youcall.png */; };
 		372C189A1D3BE599000A5510 /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 372C18961D3BE599000A5510 /* Fabric.framework */; };
 		372C189B1D3BE599000A5510 /* DigitsKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 372C18971D3BE599000A5510 /* DigitsKit.framework */; };
 		372C189C1D3BE599000A5510 /* DigitsKitResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 372C18981D3BE599000A5510 /* DigitsKitResources.bundle */; };
@@ -192,6 +193,7 @@
 		370C81321D3E04A800269221 /* RCTAddressBook.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTAddressBook.xcodeproj; path = "../node_modules/react-native-addressbook/RCTAddressBook.xcodeproj"; sourceTree = "<group>"; };
 		371068AB1D4F593700BDFC42 /* RNSound.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNSound.xcodeproj; path = "../node_modules/react-native-sound/RNSound.xcodeproj"; sourceTree = "<group>"; };
 		371068B21D4F5D9B00BDFC42 /* ringback.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ringback.wav; sourceTree = "<group>"; };
+		371068C51D50B1EE00BDFC42 /* youcall.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = youcall.png; sourceTree = "<group>"; };
 		372C18961D3BE599000A5510 /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fabric.framework; sourceTree = "<group>"; };
 		372C18971D3BE599000A5510 /* DigitsKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DigitsKit.framework; sourceTree = "<group>"; };
 		372C18981D3BE599000A5510 /* DigitsKitResources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = DigitsKitResources.bundle; path = DigitsKit.framework/Versions/A/Resources/DigitsKitResources.bundle; sourceTree = "<group>"; };
@@ -370,6 +372,7 @@
 				3747666B1D40064D009F6E53 /* AppDelegate.h */,
 				374766691D40064D009F6E53 /* AppDelegate.m */,
 				3747666C1D40064D009F6E53 /* Images.xcassets */,
+				371068C51D50B1EE00BDFC42 /* youcall.png */,
 				371068B21D4F5D9B00BDFC42 /* ringback.wav */,
 				379CB2941D454DC4003A3170 /* Marimba.m4r */,
 				374766841D4006C4009F6E53 /* LaunchScreen.xib */,
@@ -864,6 +867,7 @@
 				374766861D4006C4009F6E53 /* LaunchScreen.xib in Resources */,
 				379CB2951D454DC4003A3170 /* Marimba.m4r in Resources */,
 				371068B31D4F5D9B00BDFC42 /* ringback.wav in Resources */,
+				371068C61D50B1EE00BDFC42 /* youcall.png in Resources */,
 				372C189C1D3BE599000A5510 /* DigitsKitResources.bundle in Resources */,
 				374766701D40064D009F6E53 /* Images.xcassets in Resources */,
 			);
