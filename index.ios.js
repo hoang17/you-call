@@ -7,39 +7,41 @@ if (!window.navigator.userAgent) {
 // @hoang add RCTLog because error with CodePush
 var RCTLog = require('RCTLog');
 
-import codePush from "react-native-code-push";
-import React, { Component } from 'react';
-import {
-  AppRegistry,
-  StyleSheet,
-  Text,
-  View,
-  NavigatorIOS,
-} from 'react-native';
+require('./main');
 
-var MainView = require("./main");
-
-var YouCall = React.createClass({
-
-  componentDidMount: function() {
-    codePush.sync();
-  },
-
-  render: function() {
-      return (
-          <NavigatorIOS
-            navigationBarHidden={true}
-            style={styles.navigationContainer}
-            initialRoute={{ title: "Main", component: MainView }}
-          />
-      );
-  }
-});
-
-var styles = StyleSheet.create({
-    navigationContainer: {
-        flex: 1
-    }
-});
-
-AppRegistry.registerComponent("YouCall", () => YouCall);
+// import codePush from "react-native-code-push";
+// import React, { Component } from 'react';
+// import {
+//   AppRegistry,
+//   StyleSheet,
+//   Text,
+//   View,
+//   NavigatorIOS,
+// } from 'react-native';
+//
+// var MainView = require("./main");
+//
+// var YouCall = React.createClass({
+//
+//   componentDidMount: function() {
+//     codePush.sync();
+//   },
+//
+//   render: function() {
+//       return (
+//           <NavigatorIOS
+//             navigationBarHidden={true}
+//             style={styles.navigationContainer}
+//             initialRoute={{ title: "Main", component: MainView }}
+//           />
+//       );
+//   }
+// });
+//
+// var styles = StyleSheet.create({
+//     navigationContainer: {
+//         flex: 1
+//     }
+// });
+//
+// AppRegistry.registerComponent("YouCall", () => YouCall);

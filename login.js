@@ -5,11 +5,7 @@ import {
   AppRegistry,
   StyleSheet,
   Text,
-  TouchableHighlight,
   View,
-  TextInput,
-  ListView,
-  KeyboardAvoidingView,
   AsyncStorage,
 } from 'react-native';
 
@@ -25,21 +21,17 @@ class LoginView extends Component{
     this.onLogout = this.onLogout.bind(this);
 
     this.state = {
-      logged: false,
-      error: false,
-      response: {}
+      login: false,
     };
   }
 
   onLogin(error, response) {
 
     if (error && error.code !== 1) {
-      this.setState({ logged: false, error: true, response: {} });
       console.log('onLogin', error);
     }
     else if (response) {
-      var logged = JSON.stringify(response) === '{}' ? false : true;
-      this.setState({ logged: logged, error: false, response: response });
+      this.setState({ login: true });
 
       console.log('onLogin response', response);
 
@@ -53,11 +45,8 @@ class LoginView extends Component{
       })
       .then((response) => response.json())
       .then((responseJson) => {
-
         var number = responseJson.phone_number;
-
         var me = this;
-
         if (number && number != 'undefined'){
           me.props.socket.emit('auth', number, function(phone){
             console.log('login auth', phone._id);
@@ -68,10 +57,9 @@ class LoginView extends Component{
             }
             me.props.main._setPhone(phone);
             AsyncStorage.setItem('phone', JSON.stringify(phone));
-            me.props.navigator.pop();
+            me.props.main._hideLogin();
           });
         }
-
       })
       .catch((error) => {
         console.error(error);
@@ -81,61 +69,62 @@ class LoginView extends Component{
 
   onLogout(error, response) {
     if (error && error.code !== 1) {
-      this.setState({ logged: false, error: true, response: {} });
+      console.error(error);
     }
     else if (response) {
-      var logged = JSON.stringify(response) === '{}' ? false : true;
-      this.setState({ logged: logged, error: false, response: response });
+      this.setState({ login: false });
       AsyncStorage.removeItem("phone", function(err){
         if (err) console.log(err);
       });
+      this.props.main._setPhone(null);
     }
   }
 
   render() {
-    var error = this.state.error ? <Text>An error occured.</Text> : null;
-    var content = this.state.logged ?
-      (<View>
+    return (
+      <View style={styles.container}>
+        {this.state.login && !this.props.phone ?
+          <Text>Logging in...</Text> : null}
+
+        {this.props.phone ?
         <DigitsLogoutButton
           completion={this.onLogout}
           text="Logout"
           buttonStyle={styles.DigitsAuthenticateButton}
-          textStyle={styles.DigitsAuthenticateButtonText}/>
-      </View>) : (<DigitsLoginButton
-        options={{
-          title: "YouCall",
-          phoneNumber: "+84",
-          appearance: {
-            // backgroundColor: {
-            //   hex: "#ffffff",
-            //   alpha: 1.0
-            // },
-            // accentColor: {
-            //   hex: "#43a16f",
-            //   alpha: 0.7
-            // },
-            headerFont: {
-              name: "Arial",
-              size: 16
-            },
-            labelFont: {
-              name: "Helvetica",
-              size: 18
-            },
-            bodyFont: {
-              name: "Helvetica",
-              size: 16
+          textStyle={styles.DigitsAuthenticateButtonText}/> : null}
+
+        {!this.state.login && !this.props.phone ?
+        <DigitsLoginButton
+          options={{
+            title: "YouCall",
+            phoneNumber: "+84",
+            appearance: {
+              // backgroundColor: {
+              //   hex: "#ffffff",
+              //   alpha: 1.0
+              // },
+              // accentColor: {
+              //   hex: "#43a16f",
+              //   alpha: 0.7
+              // },
+              headerFont: {
+                name: "Arial",
+                size: 16
+              },
+              labelFont: {
+                name: "Helvetica",
+                size: 18
+              },
+              bodyFont: {
+                name: "Helvetica",
+                size: 16
+              }
             }
-          }
-        }}
-        completion={this.onLogin}
-        text="Login"
-        buttonStyle={styles.DigitsAuthenticateButton}
-        textStyle={styles.DigitsAuthenticateButtonText}/>);
-    return (
-      <View style={styles.container}>
-        {error}
-        {content}
+          }}
+          completion={this.onLogin}
+          text="Login"
+          buttonStyle={styles.DigitsAuthenticateButton}
+          textStyle={styles.DigitsAuthenticateButtonText}/> : null}
       </View>
     );
   }
