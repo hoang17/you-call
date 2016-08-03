@@ -98,6 +98,9 @@ class MainView extends Component{
       device:null,
       showIncall: false,
       showLogin: false,
+      showContacts: false,
+      syncInfo:'sync contacts',
+      syncing: false,
     };
 
     // socket = io.connect('youcall.io', {transports: ['websocket']});
@@ -732,17 +735,17 @@ class MainView extends Component{
 
   _syncContacts(){
     AddressBook.getContacts( (err, contacts) => {
+      container.setState({syncing: true});
       if(err && err.type === 'permissionDenied'){
-        alert('Can not sync contacts because permisson not granted');
+        alert('Can not sync contacts: Permisson not granted');
       }
       else{
-        container.setState({status: 'ready', info:'begin syncing ' + contacts.length +' contacts...'});
+        container.setState({ syncInfo:'begin syncing ' + contacts.length +' contacts...'});
         socket.emit('sync contacts', contacts, function(activeContacts){
-          // log('activeContacts', activeContacts);
           container.setState({contacts: activeContacts});
           container.state.phone.contacts = activeContacts;
           AsyncStorage.setItem('phone', JSON.stringify(container.state.phone));
-          container.setState({status: 'ready', info:'found ' + Object.keys(activeContacts).length +' active contacts'});
+          container.setState({ syncInfo:'found ' + Object.keys(activeContacts).length +' active contacts'});
         });
       }
     })
@@ -853,36 +856,41 @@ class MainView extends Component{
     container.setState({showLogin: false});
   }
 
+  _showContacts(){
+    container.setState({syncing: false, syncInfo: 'sync contacts', showContacts: true});
+  }
+
+  _hideContacts(){
+    container.setState({syncing: false, syncInfo: 'sync contacts', showContacts: false});
+  }
+
   render() {
     return (
       <View style={styles.outerContainer}>
         { this.state.phone ?
         <KeyboardAvoidingView behavior='padding' style={styles.container}>
+          {/*<Button
+              onPress={this._showContacts}
+              style={styles.buttonStyle6}
+              textStyle={styles.textStyle}>
+            Sync contacts
+          </Button>*/}
+          {/*<View>
+            <Text style={styles.info}>{this.state.info}</Text>
+          </View>*/}
           <View>
-            <Text style={styles.description}>{this.state.info}</Text>
+            <Button
+              onPress={this._showContacts}
+              style={styles.buttonStyle8}
+              textStyle={styles.textStyle8}>
+              Contacts
+            </Button>
           </View>
           <View style={styles.contacts}>
-            <ContactList contacts={this.state.contacts} callback={this._call} />
-          </View>
-          <View style={styles.flowRight}>
-            <TouchableHighlight style={styles.button}
-                underlayColor='#99d9f4'
-                onPress={this._syncContacts}
-                >
-              <Text style={styles.buttonText}>Sync contacts</Text>
-            </TouchableHighlight>
-            {/*<TouchableHighlight style={styles.button}
-                underlayColor='#99d9f4'
-                onPress={this._showLogin}
-                >
-              <Text style={styles.buttonText}>Show Login</Text>
-            </TouchableHighlight>
-            <TouchableHighlight style={styles.button}
-                underlayColor='#99d9f4'
-                onPress={this._ping}
-                >
-              <Text style={styles.buttonText}>Ping</Text>
-            </TouchableHighlight>*/}
+            <ContactList
+              contacts={this.state.contacts}
+              syncContacts={this._syncContacts}
+              call={this._call} />
           </View>
         </KeyboardAvoidingView> : null }
         <Modal
@@ -893,7 +901,7 @@ class MainView extends Component{
           >
           <View style={[styles.container, { backgroundColor: '#f5fcff' }]}>
             <View style={[styles.innerContainer]}>
-              <Text style={styles.description}>{this.state.info}</Text>
+              <Text style={styles.info}>{this.state.info}</Text>
               { this.state.status == 'incoming' ?
               <Button
                 onPress={this._accept}
@@ -911,6 +919,30 @@ class MainView extends Component{
             </View>
           </View>
         </Modal>
+        <Modal
+          animationType='slide'
+          transparent={false}
+          visible={this.state.showContacts}
+          >
+          <View style={[styles.container, { backgroundColor: '#f5fcff' }]}>
+            <View style={[styles.innerContainer]}>
+              <Text style={styles.info}>{this.state.syncInfo}</Text>
+              { this.state.syncing ?
+              <Button
+                  onPress={this._hideContacts}
+                  style={styles.buttonStyle5}
+                  textStyle={styles.textStyle}>
+                Done
+              </Button> :
+              <Button
+                  onPress={this._syncContacts}
+                  style={styles.buttonStyle1}
+                  textStyle={styles.textStyle}>
+                Sync contacts
+              </Button> }
+            </View>
+          </View>
+          </Modal>
         { this.state.showLogin ?
         <LoginView
           socket={socket}
@@ -939,7 +971,7 @@ function log(msg, data) {
 }
 
 const styles = StyleSheet.create({
-  description: {
+  info: {
     marginBottom: 10,
     fontSize: 18,
     textAlign: 'center',
@@ -951,62 +983,24 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    paddingTop:20,
+    paddingLeft:10,
+    paddingRight:10,
     flex:1,
-    marginBottom:20
   },
   flowRight: {
 	  alignItems: 'center',
 	  alignSelf: 'stretch'
 	},
   contacts: {
+    flex: 1,
     alignSelf: 'stretch',
-    height:300,
-    borderWidth:1,
-    borderColor: '#48BBEC',
-    borderRadius: 4,
+    // height:300,
+    // borderWidth:1,
+    // borderColor: '#48BBEC',
+    // borderColor: '#27ae60',
+    // borderRadius: 4,
   },
-	buttonText: {
-	  fontSize: 18,
-	  color: 'white',
-	  alignSelf: 'center'
-	},
-	button: {
-	  height: 36,
-	  flex: 1,
-	  flexDirection: 'row',
-	  backgroundColor: '#48BBEC',
-	  borderColor: '#48BBEC',
-	  borderWidth: 1,
-	  borderRadius: 4,
-	  marginTop: 10,
-	  alignSelf: 'stretch',
-	  justifyContent: 'center'
-	},
-  redbutton: {
-	  height: 36,
-	  flex: 1,
-	  flexDirection: 'row',
-	  backgroundColor: 'red',
-	  borderColor: 'red',
-	  borderWidth: 1,
-	  borderRadius: 4,
-	  marginTop: 10,
-	  alignSelf: 'stretch',
-	  justifyContent: 'center'
-	},
-  greenbutton: {
-	  height: 36,
-	  flex: 1,
-	  flexDirection: 'row',
-	  backgroundColor: 'green',
-	  borderColor: 'green',
-	  borderWidth: 1,
-	  borderRadius: 4,
-	  marginTop: 10,
-	  alignSelf: 'stretch',
-	  justifyContent: 'center'
-	},
 
   textStyle: {
     color: 'white'
@@ -1016,37 +1010,61 @@ const styles = StyleSheet.create({
     fontFamily: 'Avenir',
     fontWeight: 'bold'
   },
-  buttonStylePressing: {
-    borderColor: 'red',
-    backgroundColor: 'red'
-  },
   buttonStyle: {
     borderColor: '#f39c12',
-    backgroundColor: '#f1c40f'
+    backgroundColor: '#f1c40f',
+    borderWidth: 2,
+    borderRadius: 22,
+    paddingLeft:20,
+    paddingRight:20,
   },
   buttonStyle1: {
     borderColor: '#d35400',
-    backgroundColor: '#e98b39'
+    backgroundColor: '#e98b39',
+    borderWidth: 2,
+    borderRadius: 22,
+    paddingLeft:20,
+    paddingRight:20,
   },
   buttonStyle2: {
     borderColor: '#c0392b',
-    backgroundColor: '#e74c3c'
+    backgroundColor: '#e74c3c',
+    borderWidth: 2,
+    borderRadius: 22,
+    paddingLeft:20,
+    paddingRight:20,
   },
   buttonStyle3: {
     borderColor: '#16a085',
-    backgroundColor: '#1abc9c'
+    backgroundColor: '#1abc9c',
+    borderWidth: 2,
+    borderRadius: 22,
+    paddingLeft:20,
+    paddingRight:20,
   },
   buttonStyle4: {
     borderColor: '#27ae60',
-    backgroundColor: '#2ecc71'
+    backgroundColor: '#2ecc71',
+    borderWidth: 2,
+    borderRadius: 22,
+    paddingLeft:20,
+    paddingRight:20,
   },
   buttonStyle5: {
     borderColor: '#2980b9',
-    backgroundColor: '#3498db'
+    backgroundColor: '#3498db',
+    borderWidth: 2,
+    borderRadius: 22,
+    paddingLeft:20,
+    paddingRight:20,
   },
   buttonStyle6: {
     borderColor: '#8e44ad',
-    backgroundColor: '#9b59b6'
+    backgroundColor: '#9b59b6',
+    borderWidth: 2,
+    borderRadius: 22,
+    paddingLeft:20,
+    paddingRight:20,
   },
   buttonStyle7: {
     borderColor: '#8e44ad',
@@ -1055,15 +1073,20 @@ const styles = StyleSheet.create({
     borderWidth: 3,
   },
   buttonStyle8: {
-    backgroundColor: 'white',
-    borderColor: '#333',
+    // backgroundColor: 'white',
+    // borderColor: '#333',
+    borderColor: '#27ae60',
+    backgroundColor: '#2ecc71',
     borderWidth: 2,
     borderRadius: 22,
+    paddingLeft:20,
+    paddingRight:20,
   },
   textStyle8: {
     fontFamily: 'Avenir Next',
     fontWeight: '500',
-    color: '#333',
+    // color: '#333',
+    color: 'white'
   },
   customViewStyle: {
     width: 120,
