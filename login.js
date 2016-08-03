@@ -122,7 +122,7 @@ class LoginView extends Component{
             }
           }}
           completion={this.onLogin}
-          text="Login"
+          text="Verify your number"
           buttonStyle={styles.DigitsAuthenticateButton}
           textStyle={styles.DigitsAuthenticateButtonText}/> : null}
       </View>
