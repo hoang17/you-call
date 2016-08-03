@@ -44,8 +44,9 @@ class LoginView extends Component{
         }
       })
       .then((response) => response.json())
-      .then((responseJson) => {
-        var number = responseJson.phone_number;
+      .then((json) => {
+        console.log(json);
+        var number = json.phone_number;
         var me = this;
         if (number && number != 'undefined'){
           me.props.socket.emit('auth', number, function(phone){

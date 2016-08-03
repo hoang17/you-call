@@ -869,21 +869,12 @@ class MainView extends Component{
       <View style={styles.outerContainer}>
         { this.state.phone ?
         <KeyboardAvoidingView behavior='padding' style={styles.container}>
-          {/*<Button
-              onPress={this._showContacts}
-              style={styles.buttonStyle6}
-              textStyle={styles.textStyle}>
-            Sync contacts
-          </Button>*/}
-          {/*<View>
-            <Text style={styles.info}>{this.state.info}</Text>
-          </View>*/}
           <View>
             <Button
               onPress={this._showContacts}
               style={styles.buttonStyle8}
               textStyle={styles.textStyle8}>
-              Contacts
+              {this.state.phone._id}
             </Button>
           </View>
           <View style={styles.contacts}>
@@ -891,6 +882,20 @@ class MainView extends Component{
               contacts={this.state.contacts}
               syncContacts={this._syncContacts}
               call={this._call} />
+          </View>
+          <View style={styles.flowRight}>
+            <Button
+              //onPress={this._showContacts}
+              style={[styles.buttonStyle5, {width:100}]}
+              textStyle={styles.textStyle8}>
+              Calls
+            </Button>
+            <Button
+              //onPress={this._showContacts}
+              style={[styles.buttonStyle8, {width:100}]}
+              textStyle={styles.textStyle8}>
+              Contacts
+            </Button>
           </View>
         </KeyboardAvoidingView> : null }
         <Modal
@@ -927,19 +932,19 @@ class MainView extends Component{
           <View style={[styles.container, { backgroundColor: '#f5fcff' }]}>
             <View style={[styles.innerContainer]}>
               <Text style={styles.info}>{this.state.syncInfo}</Text>
-              { this.state.syncing ?
-              <Button
-                  onPress={this._hideContacts}
-                  style={styles.buttonStyle5}
-                  textStyle={styles.textStyle}>
-                Done
-              </Button> :
+              {this.state.syncing ? null :
               <Button
                   onPress={this._syncContacts}
                   style={styles.buttonStyle1}
                   textStyle={styles.textStyle}>
                 Sync contacts
-              </Button> }
+              </Button>}
+              <Button
+                  onPress={this._hideContacts}
+                  style={styles.buttonStyle5}
+                  textStyle={styles.textStyle}>
+                Done
+              </Button>
             </View>
           </View>
           </Modal>
@@ -983,14 +988,16 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop:20,
+    paddingTop:30,
     paddingLeft:10,
     paddingRight:10,
     flex:1,
   },
   flowRight: {
+    flexDirection: 'row',
 	  alignItems: 'center',
-	  alignSelf: 'stretch'
+	  // alignSelf: 'stretch',
+    // borderWidth:1,
 	},
   contacts: {
     flex: 1,
@@ -1057,6 +1064,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     paddingLeft:20,
     paddingRight:20,
+    // width:100,
   },
   buttonStyle6: {
     borderColor: '#8e44ad',
@@ -1081,6 +1089,8 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     paddingLeft:20,
     paddingRight:20,
+    marginLeft:10,
+    // width:100,
   },
   textStyle8: {
     fontFamily: 'Avenir Next',

@@ -12,9 +12,6 @@
             <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
-                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="youcall.png" translatesAutoresizingMaskIntoConstraints="NO" id="WdW-V2-hVd">
-                    <rect key="frame" x="60" y="218" width="200" height="200"/>
-                </imageView>
                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" usesAttributedText="YES" lineBreakMode="middleTruncation" baselineAdjustment="alignBaselines" minimumFontSize="18" translatesAutoresizingMaskIntoConstraints="NO" id="kId-c2-rCX">
                     <rect key="frame" x="20" y="158" width="280" height="43"/>
                     <attributedString key="attributedText">
@@ -28,6 +25,9 @@
                     </attributedString>
                     <nil key="highlightedColor"/>
                 </label>
+                <imageView autoresizesSubviews="NO" opaque="NO" clearsContextBeforeDrawing="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="youcall.png" translatesAutoresizingMaskIntoConstraints="NO" id="WdW-V2-hVd">
+                    <rect key="frame" x="60" y="227" width="200" height="200"/>
+                </imageView>
             </subviews>
             <color key="backgroundColor" red="0.20784313725490197" green="0.69019607843137254" blue="0.14117647058823529" alpha="1" colorSpace="calibratedRGB"/>
             <constraints>
