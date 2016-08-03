@@ -99,7 +99,7 @@ class MainView extends Component{
       showIncall: false,
       showLogin: false,
       showContacts: false,
-      syncInfo:'sync contacts',
+      syncInfo:'',
       syncing: false,
     };
 
@@ -857,11 +857,11 @@ class MainView extends Component{
   }
 
   _showContacts(){
-    container.setState({syncing: false, syncInfo: 'sync contacts', showContacts: true});
+    container.setState({syncing: false, syncInfo: '', showContacts: true});
   }
 
   _hideContacts(){
-    container.setState({syncing: false, syncInfo: 'sync contacts', showContacts: false});
+    container.setState({syncing: false, syncInfo: '', showContacts: false});
   }
 
   render() {
